@@ -33,7 +33,7 @@ Alfa1750:setuphelper-package
 ## Controlled test procedure (not yet executed)
 
 1. Keep the repository private.
-2. While signed in to GitHub with access to the repository, download the source archive for branch `setuphelper-package) as a `.tar.gz` file.
+2. While signed in to GitHub with access to the repository, download the source archive for branch `setuphelper-package` as a `.tar.gz` file.
 3. Rename the downloaded archive to exactly `VantourerDisplayBridge-setuphelper-package.tar.gz`.
 4. Copy that archive unchanged to SD/USB media.
 5. On the clean Venus OS 3.85 test installation, insert the media and allow PackageManager to detect and transfer the archive.
