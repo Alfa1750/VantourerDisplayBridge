@@ -103,15 +103,21 @@ This proves the Node-RED TCP test path works. It does **not** prove that the Pyt
 
 ## Bluetooth system interaction — important reported finding
 
-During development, `vesmart-server` was stopped because it interfered with the ESP32 BLE scan/discovery. After it was stopped, the ESP32 could find and connect to the Pi GATT server. VictronConnect was reported to remain usable without `vesmart-server`.
+During development, `vesmart-server` was stopped because it interfered with the ESP32 BLE scan/discovery. After it was stopped, the ESP32 could find and connect to the Pi GATT server. VictronConnect was reported to remain usable while `vesmart-server` was stopped.
 
-Still unknown:
-- Whether the service was only stopped or also disabled persistently.
-- Whether the state survives reboot.
-- Whether this is necessary on all target Venus OS versions/hardware.
-- Whether a less disruptive solution exists.
+**Clarification from the user (Nov 20, 2026):**
+- On the reference Pi, `vesmart-server` was **stopped only**; it was not disabled persistently.
+- Because it was not disabled, it starts again after a reboot. The BLE conflict therefore returns after reboot unless the service is stopped again.
+- A persistent disable/handling mechanism still needs to be implemented and version-controlled in this project's GitHub repository, then tested. It has not yet been implemented.
+- Whether this is also necessary on other Venus OS versions is unknown. The user expects that to be established only after a Venus OS update and subsequent testing.
 
-Do not silently omit this finding from the SetupHelper analysis. Do not blindly disable it in an installer until the behavior and side effects are verified.
+Implementation and validation still required:
+- Determine the safest supported way to keep `vesmart-server` from interfering after reboot, and implement that behavior in the project (not as an undocumented manual step).
+- Verify side effects, including VictronConnect and other Venus OS functionality, before making persistent changes.
+- Re-test after reboot.
+- Re-evaluate behavior after a Venus OS update; do not assume the same workaround is needed on every version.
+
+Do not silently omit this finding from the SetupHelper analysis. Do not blindly disable the service in an installer before the required behavior and side effects are validated.
 
 ## Versions and naming
 
