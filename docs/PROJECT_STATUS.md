@@ -269,3 +269,29 @@ The previous log directory basename `VictronBLE` was an unsuitable name because 
 - Historical references in this status document now identify the old `VictronBLE` path as a legacy name, not a separate product or Victron application.
 - The reference Pi has NOT been modified yet. Its active and persistent service copies still require a controlled update.
 - The base-directory question (`/var/log` versus `/data/log`) remains separate and must be verified before applying the new log path on the Pi.
+
+
+### Log directory rename completed on reference Pi (Nov 20, 2026)
+
+The user completed the legacy log-directory rename on the reference Pi in a controlled sequence. This section supersedes earlier statements in this document that the live Pi had not yet been changed or that the log path was still unresolved.
+
+Verified facts from the user's terminal output:
+
+- `/var/log` is a symbolic link to `/data/log`; both path spellings address the same underlying directory.
+- The old directory `/data/log/VictronBLE` was renamed to `/data/log/VantourerDisplayBridge`. The existing multilog files were retained.
+- Before editing, backups of all three log scripts were created under `/root/VantourerDisplayBridge-backup/`:
+  - `run-project`
+  - `run-persistent`
+  - `run-active`
+- The log service was stopped through its runit control FIFO with `printf d > /service/VantourerDisplayBridge/log/supervise/control`. The `sv` command was not present in the command path.
+- The following three `log/run` files were updated and individually checked. All now execute `multilog t s25000 n4 /var/log/VantourerDisplayBridge`:
+  - `/data/VantourerDisplayBridge/services/VantourerDisplayBridge/log/run`
+  - `/opt/victronenergy/service/VantourerDisplayBridge/log/run`
+  - `/service/VantourerDisplayBridge/log/run`
+- The log service was restarted through its runit control FIFO with `printf u > /service/VantourerDisplayBridge/log/supervise/control`.
+- BusyBox `ps` then showed PID 31388 running `multilog t s25000 n4 /var/log/VantourerDisplayBridge`.
+- The renamed log directory contained the previous rotated files, `current`, `lock`, and `state`. The tail of `current` showed historical test notifications `Pi -> ESP32: Hallo vanaf Raspberry Pi` and the message `ESP32 heeft notifications uitgeschakeld`.
+- The `current` file size was still 13,826 bytes, the same size reported before the rename/restart. Therefore the output confirms that the existing log data was retained and the new multilog process is running, but it does not yet prove that new records were appended after restart.
+- An earlier process check found no running `gatt_server.py` process. Do not infer that the BLE server is currently running from the presence of old test messages in the log.
+
+The active and persistent service scripts were not changed by this operation; only their respective `log/run` files were changed. The project snapshot in GitHub already contains the new log path. The reference Pi remains a development system; this operation does not establish clean-install or reboot acceptance.
