@@ -1,3 +1,10 @@
+> [!CAUTION]
+> **EXPERIMENTAL DEVELOPMENT — NOT WORKING / NOT READY FOR INSTALLATION**
+>
+> This repository contains work in progress. The SetupHelper package and BLE bridge have **not** been validated as a working, end-to-end installation. Installation, updates, reboot behavior, and live BLE operation on a clean Venus OS system are still under development and testing.
+>
+> **Do not install this package on a production system or rely on it for operation.** It is published publicly only so Venus OS SetupHelper can retrieve development updates during testing. The code and package may change or break without notice.
+
 # Vantourer Display Bridge
 
 Private project repository for the Raspberry Pi / Venus OS bridge used by the ESP32-S3 Victron display.
