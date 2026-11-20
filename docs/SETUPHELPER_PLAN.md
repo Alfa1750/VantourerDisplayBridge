@@ -36,8 +36,8 @@ Do not assume any of these steps are already implemented merely because the rele
 
 - Full SetupHelper option directory not captured.
 - Full project source tree not captured.
-- Full service directory not captured.
-- Active runit `run` script not captured.
+- The complete service directory has not yet been captured; the active service `run` and `log/run` scripts have been captured in the repository.
+- The active, persistent, and project-copy `log/run` scripts on the reference Pi now use `/var/log/VantourerDisplayBridge`; the log directory rename and live logging test are complete. Installer behavior still needs to reproduce this correctly on a clean test Pi.
 - Runtime dependencies not inventoried.
 - Bluetooth and `vesmart-server` state not fully documented.
 - Python TCP integration not implemented.
