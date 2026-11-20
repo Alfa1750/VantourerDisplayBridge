@@ -119,7 +119,6 @@ Implementation and validation still required:
 
 Do not silently omit this finding from the SetupHelper analysis. Do not blindly disable the service in an installer before the required behavior and side effects are validated.
 
-
 ### Runtime inventory from reference Pi (Nov 20, 2026)
 
 Read-only checks on the reference Pi returned:
@@ -216,3 +215,17 @@ The user ran a byte comparison on the reference Pi between the active `src/gatt_
 
 The active `gatt_server.py` remains the file used by the runit service and is already captured as `pi-snapshot/src/gatt_server.py`. The `v0.3.6` duplicate does not need a separate source snapshot. The backup file's complete contents have not yet been captured into GitHub; preserve it as a historical reference only if/when its exact contents are copied from the Pi. Do not substitute it for the active source without an explicit decision.
 
+
+### Active and persistent runit service locations (checked Nov 20, 2026)
+
+The user ran read-only directory listings and a service status check on the reference Pi:
+
+- Active runit service directory: `/service/VantourerDisplayBridge`.
+  - Contains `run` (81 bytes, executable), `log/`, and `supervise/`.
+- Persistent service directory: `/opt/victronenergy/service/VantourerDisplayBridge`.
+  - Contains `run` (81 bytes, executable) and `log/`.
+  - No `supervise/` directory was listed there.
+- `svstat /service/VantourerDisplayBridge` reported `up`, PID 20694, uptime 28171 seconds at the time of this check.
+- Both active and persistent directories therefore exist, and both list an executable `run` file of the same size. The output did **not** compare the contents or establish whether the active directory is a symlink or a copy of the persistent directory. Do not infer that the two `run` files are identical from equal file sizes.
+- The `supervise/` directory is present in the active service directory; this is consistent with runit supervision state being maintained for the active service. Its absence from the persistent directory listing is not itself an error.
+- Next verification, if needed: inspect `ls -ld` for both paths and compare the two `run` and `log/run` files with `cmp` or `md5sum`. This can be done read-only; do not modify service files or restart the service.
