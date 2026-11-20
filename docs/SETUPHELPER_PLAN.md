@@ -2,6 +2,21 @@
 
 ## Objective
 
+## Development order and scope boundary
+
+**Priority decision (Nov 20, 2026): finish and validate SetupHelper before starting Node-RED integration work.**
+
+Phase 1 is the complete SetupHelper package for the currently implemented Raspberry Pi BLE bridge. This phase includes the package structure, installer lifecycle, dependencies and Bluetooth prerequisites, runit service, bounded logging, safe handling of the `vesmart-server` conflict, and clean-install/update/uninstall/reboot validation on a separate test Pi.
+
+Node-RED is deliberately outside Phase 1:
+- Do not build or modify Node-RED flows during SetupHelper work.
+- Do not implement the Python TCP integration yet.
+- Do not make the SetupHelper installer import, overwrite, or configure Node-RED flows.
+- Preserve the intended future separation: Node-RED flows will be maintained/exported separately from the SetupHelper package.
+- The future Node-RED/TCP integration may require a later bridge package update, but it is not a prerequisite for validating the current BLE-only SetupHelper package.
+
+Only after Phase 1 passes its acceptance criteria should development move to Node-RED/TCP integration.
+
 A clean Venus OS Raspberry Pi must be installable through the project's SetupHelper option without relying on undocumented manual steps from the development Pi.
 
 ## Known installation footprint
@@ -26,7 +41,7 @@ The final installer must be based on inspected, tested requirements. Likely area
 5. Install runit service files and configure log handling.
 6. Enable/start service using the supported SetupHelper/Venus OS conventions.
 7. Implement and test persistent handling of the `vesmart-server` BLE conflict: it was only stopped manually on the reference Pi, it restarts after reboot, and the persistent handling must be version-controlled in this repository. Verify side effects before disabling it; necessity on other Venus OS versions remains unknown until tested after an OS update.
-8. Configure Node-RED TCP endpoint/port and document matching flow setup.
+8. Keep Node-RED flow installation/configuration outside this package; Node-RED/TCP integration is a later development phase.
 9. Provide safe update/reinstall behavior.
 10. Provide a documented removal/rollback strategy if supported by SetupHelper conventions.
 
@@ -40,8 +55,7 @@ Do not assume any of these steps are already implemented merely because the rele
 - The active, persistent, and project-copy `log/run` scripts on the reference Pi now use `/var/log/VantourerDisplayBridge`; the log directory rename and live logging test are complete. Installer behavior still needs to reproduce this correctly on a clean test Pi.
 - Runtime dependencies not inventoried.
 - Bluetooth and `vesmart-server` state not fully documented.
-- Python TCP integration not implemented.
-- Final Node-RED flow not available in repository.
+- Python TCP integration and Node-RED flow are intentionally deferred until the SetupHelper package for the current BLE bridge has passed its acceptance criteria.
 
 ## Acceptance criteria
 
@@ -51,8 +65,7 @@ A release candidate is accepted only when all of the following are demonstrated 
 - All dependencies are installed or verified without undocumented manual intervention.
 - BLE server advertises and accepts ESP32 connection.
 - Notifications and writes work in both directions.
-- Node-RED and Python maintain the intended TCP connection.
-- Node-RED data reaches ESP32 and ESP32 data reaches Node-RED.
+- Node-RED/TCP end-to-end behavior is explicitly not part of Phase 1 SetupHelper acceptance; it will be tested in the later integration phase.
 - The service starts automatically after reboot.
 - The `vesmart-server` handling is validated and does not cause unacceptable loss of functionality.
 - Re-running the installer/update process does not damage the installation.
