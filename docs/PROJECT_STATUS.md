@@ -189,3 +189,9 @@ The exact contents of `/data/VantourerDisplayBridge/ReadMe.md` were read on Nov 
 ### Python bridge version marker captured from Pi
 
 The exact contents of `/data/VantourerDisplayBridge/version` were read on Nov 20, 2026 and saved as `pi-snapshot/version`: `v0.1d`. This is the Python bridge package's version marker, separate from the ESP32 firmware/project version `v0.3.6`.
+
+### SetupHelper installation framework inventory (Pi, Nov 20 2026)
+
+A directory listing of `/data/SetupHelper` confirms the framework is present and contains `.github/`, `FileSets/`, `HelperResources/`, `blindInstall/`, `services/`, and `velib_python/`, plus files including `PackageManager.py`, `PackageDevelopmentGuidelines.md`, `ReadMe.md`, `defaultPackageList`, `forSetupScript`, `genericSetupScript`, `setup`, `updatePackage`, and other framework utilities/archives. `CommonResources` is a symlink to `HelperResources/IncludeHelpers`.
+
+The listing also shows a framework version file (`version`, 8 bytes) and package archives. This is a third-party/shared SetupHelper framework, not part of the VantourerDisplayBridge package itself. We are inventorying only the specific helper files and package conventions needed to understand and reproduce this package's installation; we are not copying the entire framework into the VantourerDisplayBridge repository.
