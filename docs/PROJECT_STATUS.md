@@ -21,7 +21,7 @@ The following paths were returned by a BusyBox `find` command on the reference P
 - `/data/setupOptions/VantourerDisplayBridge`
 - `/data/VantourerDisplayBridge`
 - `/data/VantourerDisplayBridge/services/VantourerDisplayBridge`
-- `/data/log/VictronBLE`
+- `/data/log/VantourerDisplayBridge`
 - `/service/VantourerDisplayBridge`
 
 The directory `/service/VantourerDisplayBridge` contained:
@@ -70,7 +70,7 @@ The exact package service scripts have been captured in GitHub. The active and p
 The SetupHelper v9.7 service-management implementation has now been inspected. Its documented behavior explains this layout: `/opt/victronenergy/service` is persistent storage; Venus OS copies service definitions into the temporary `/service` filesystem at boot. SetupHelper copies package service definitions into both locations during installation and updates the active `run` and `log/run` scripts when an existing service is reinstalled. See `docs/SETUPHELPER_V9.7_REFERENCE.md` for the source-level details.
 
 Still unresolved:
-- Verify the active log destination and resolve the earlier `/data/log/VictronBLE` versus `/var/log/VictronBLE` discrepancy.
+- Replace the legacy log-directory name `VictronBLE` on the reference Pi with `VantourerDisplayBridge`. The GitHub service snapshot now uses `/var/log/VantourerDisplayBridge`; the live Pi has not yet been changed. Separately verify whether the active logger's `/var/log` destination is correct for this Venus OS system.
 
 ## SetupHelper — partially observed
 
@@ -84,9 +84,9 @@ The recursive listing of `/data/VantourerDisplayBridge/services` (provided Nov 2
 The exact contents were subsequently read from the Pi and copied into the repository under `pi-snapshot/services/VantourerDisplayBridge/`:
 
 - `run` executes `python3 /data/VantourerDisplayBridge/src/gatt_server.py` and redirects stderr to stdout.
-- `log/run` executes `multilog t s25000 n4 /var/log/VictronBLE`.
+- `log/run` executes `multilog t s25000 n4 /var/log/VantourerDisplayBridge`.
 
-The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log script writes to `/var/log/VictronBLE`, whereas an earlier inventory found `/data/log/VictronBLE`; this path discrepancy is unresolved and must be checked before changing anything. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive listing of `/data/VantourerDisplayBridge/src` (provided Nov 20, 2026) confirms:
+The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log script on the reference Pi still used the legacy name `/var/log/VictronBLE`. An earlier inventory also found a directory named `/data/log/VictronBLE`. The legacy basename is being replaced in the project configuration with `VantourerDisplayBridge`; the live Pi has not yet been renamed. The `/var/log` versus `/data/log` location must be verified separately before changing the live service. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive listing of `/data/VantourerDisplayBridge/src` (provided Nov 20, 2026) confirms:
 - `gatt_server.py` — 7,367 bytes, modified Nov 20 at 11:05; this is the active source path referenced by the runit `run` script.
 - `gatt_server_backup.py` — 6,912 bytes, modified Nov 20 at 10:54.
 - `gatt_server_v0.3.6.py` — 7,367 bytes, modified Nov 20 at 11:05. Likely a naming/version-control mistake that reused the ESP32 firmware version `v0.3.6`; this is a user-suggested explanation, not yet verified by comparing file contents.
@@ -167,7 +167,7 @@ Still to identify: the actual BlueZ daemon executable/package/version and how it
 Naming discrepancy:
 - Project and service use `VantourerDisplayBridge`.
 - README previously began with `VictronBLE`.
-- Log path `/data/log/VictronBLE` was found.
+- Log path `/data/log/VantourerDisplayBridge` was found.
 - It is not yet known whether the old log name is still referenced by active service/configuration code.
 
 ## Temporary tests — do not ship as production behavior by default
@@ -259,3 +259,13 @@ The user inspected both service directory types and compared the service scripts
 ### SetupHelper service-copy mechanism verified (Nov 20, 2026)
 
 The upstream SetupHelper v9.7 `ServiceResources` implementation was inspected and documented in `docs/SETUPHELPER_V9.7_REFERENCE.md`. The reference Pi's separate active/persistent service directories and matching `run` and `log/run` files are consistent with that implementation. No changes were made to the reference Pi.
+
+
+### Project-owned log directory naming (Nov 20, 2026)
+
+The previous log directory basename `VictronBLE` was an unsuitable name because it could imply an official Victron application. The project-owned name is `VantourerDisplayBridge`.
+
+- The canonical service snapshot `pi-snapshot/services/VantourerDisplayBridge/log/run` has been updated to write to `/var/log/VantourerDisplayBridge`.
+- Historical references in this status document now identify the old `VictronBLE` path as a legacy name, not a separate product or Victron application.
+- The reference Pi has NOT been modified yet. Its active and persistent service copies still require a controlled update.
+- The base-directory question (`/var/log` versus `/data/log`) remains separate and must be verified before applying the new log path on the Pi.
