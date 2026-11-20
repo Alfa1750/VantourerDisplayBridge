@@ -1,0 +1,40 @@
+name: SetupHelper package checks
+
+on:
+  push:
+    branches:
+      - setuphelper-package
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check shell syntax
+        run: |
+          bash -n setup
+          sh -n services/VantourerDisplayBridge/run
+          sh -n services/VantourerDisplayBridge/log/run
+
+      - name: Check Python syntax
+        run: python -m py_compile src/gatt_server.py
+
+      - name: Check package layout and executable permissions
+        run: |
+          test -f version
+          test -f gitHubInfo
+          test -f ReadMe.md
+          test -x setup
+          test -x services/VantourerDisplayBridge/run
+          test -x services/VantourerDisplayBridge/log/run
+          ! grep -q "Hallo vanaf Raspberry Pi" src/gatt_server.py
