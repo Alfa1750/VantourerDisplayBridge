@@ -87,7 +87,7 @@ The original Pi listing showed both scripts as executable. GitHub's file snapsho
 - `gatt_server_v0.3.6.py` — 7,367 bytes, modified Nov 20 at 11:05.
 - `__pycache__/gatt_server.cpython-312.pyc` — compiled Python cache, 14,256 bytes.
 
-The two 7,367-byte Python files have matching sizes and timestamps, but their contents have not yet been compared; do not assume they are identical. The backup is also not yet inspected. The exact source files still need to be read from the Pi and copied into `pi-snapshot/` in GitHub. No claim is made that a clean installation currently works.
+The two 7,367-byte Python files have matching sizes and timestamps, but their contents have not yet been compared; do not assume they are identical. The backup is also not yet inspected. The active source `/data/VantourerDisplayBridge/src/gatt_server.py` was read in full from the Pi on Nov 20, 2026 and copied verbatim to `pi-snapshot/src/gatt_server.py` in GitHub. It implements the BLE GATT service/advertisement and currently sends the test notification `Hallo vanaf Raspberry Pi` every two seconds after `StartNotify`; received ESP32 writes are only printed to stdout. There is no TCP/Node-RED integration in this captured active source. The backup and `gatt_server_v0.3.6.py` have not yet been read or compared. No claim is made that a clean installation currently works.
 
 ## Node-RED / TCP — test completed, integration pending
 
