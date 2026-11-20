@@ -119,6 +119,22 @@ Implementation and validation still required:
 
 Do not silently omit this finding from the SetupHelper analysis. Do not blindly disable the service in an installer before the required behavior and side effects are validated.
 
+
+### Runtime inventory from reference Pi (Nov 20, 2026)
+
+Read-only checks on the reference Pi returned:
+
+- Python: `Python 3.12.15`.
+- `dbus`: import succeeds; module path `/usr/lib/python3.12/site-packages/dbus/__init__.py`.
+- `dbus.mainloop.glib`: import succeeds.
+- `gi`: import succeeds; module path `/usr/lib/python3.12/site-packages/gi/__init__.py`.
+- `GLib`: import succeeds; reported GLib major/minor version `2.78`.
+- `bluetoothd --version`: command was not found (`-sh: bluetoothd: command not found`). This only establishes that the command was not available under that command name/PATH; it does **not** establish that BlueZ or the Bluetooth daemon is absent.
+- `/service/VantourerDisplayBridge`: reported `up`, PID 20694, uptime 27805 seconds at the time of the check.
+- `/service/vesmart-server`: reported `down 30099 seconds, normally up`. This confirms it was currently down while its runit configuration says it is normally up. The user has clarified that it was manually stopped, not persistently disabled; it is expected to start again after reboot.
+
+Still to identify: the actual BlueZ daemon executable/package/version and how it is exposed on this Venus OS image. Do not infer its absence from the failed `bluetoothd --version` command.
+
 ## Versions and naming
 
 - ESP32 project: `VictronDisplay7`, version `v0.3.6` (VS Code project only).
