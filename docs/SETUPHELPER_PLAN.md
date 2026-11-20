@@ -11,7 +11,7 @@ Observed paths on the development Pi:
 - `/data/VantourerDisplayBridge`
 - `/data/VantourerDisplayBridge/services/VantourerDisplayBridge`
 - `/service/VantourerDisplayBridge`
-- `/data/log/VictronBLE`
+- `/data/log/VantourerDisplayBridge`
 
 The project setup entry point currently shown in conversation sources SetupHelper's `IncludeHelpers`. The exact full setup option and helper calls have not yet been captured.
 
