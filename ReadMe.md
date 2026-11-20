@@ -22,7 +22,7 @@ Node-RED flows and TCP integration are deliberately out of scope for this packag
 
 ## Package status
 
-This is a development branch, not a release. The required deployment workflow is the normal GUI v1 → SetupHelper / PackageManager → Update flow. PackageManager fetches the package version from `raw.githubusercontent.com` and the source archive from `github.com/<user>/<package>/archive/<branch>.tar.gz`. These requests are unauthenticated in the inspected SetupHelper implementation. Because this repository is private, the Pi cannot currently see new GitHub versions or download updates. Do not use SD/USB archives as a development workaround. Resolve repository access before performing the first GUI update test. The `gitHubInfo` value is `Alfa1750:setuphelper-package`.
+This is a development branch, not a release. The required deployment workflow is the normal GUI v1 → SetupHelper / PackageManager → Update flow. PackageManager fetches the package version from `raw.githubusercontent.com` and the source archive from `github.com/<user>/<package>/archive/<branch>.tar.gz`. These requests are unauthenticated in the inspected SetupHelper implementation. The repository is now public, so these endpoints can be accessed without GitHub authentication. Do not use SD/USB archives as a development workaround. The configured `gitHubInfo` value is `Alfa1750:setuphelper-package`.
 
 The BLE source in this package is based on the captured active reference-Pi source. The temporary periodic `Hallo vanaf Raspberry Pi` test notification has been removed. No production telemetry or TCP/Node-RED integration is implemented yet.
 
