@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Build and editor artifacts
+build/
+dist/
+.vscode/
+.idea/
+*.swp
+*.tmp
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Logs and runtime state
+*.log
+*.pid
