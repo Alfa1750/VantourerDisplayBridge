@@ -17,6 +17,10 @@ fi
 
 if [ "$scriptAction" == "INSTALL" ]; then
 
+    # No package changes have been made yet. Keep failures in this preflight
+    # phase from triggering SetupHelper's automatic uninstall of an old version.
+    installPreChecks=true
+
     if ! command -v python3 >/dev/null 2>&1; then
         setInstallFailed $EXIT_ERROR "Python 3 is required but python3 was not found."
     fi
@@ -59,6 +63,12 @@ PY
         if svstat /service/vesmart-server 2>/dev/null | grep -q ': up'; then
             logMessage "WARNING: vesmart-server is running. On the development Pi this interfered with ESP32 BLE discovery. This installer will not stop or disable it; validate the effect on this Venus OS version."
         fi
+    fi
+
+    # From this point onward SetupHelper may modify service state. Failures
+    # during installation must therefore trigger its normal rollback path.
+    if ! $installFailed; then
+        installPreChecks=false
     fi
 fi
 
