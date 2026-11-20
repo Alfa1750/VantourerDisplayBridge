@@ -73,7 +73,8 @@ PY
     # The reference Pi needed vesmart-server stopped for reliable ESP32
     # discovery. Report its state, but never stop or disable it automatically.
     if ! $installFailed && command -v svstat >/dev/null 2>&1; then
-        if svstat /service/vesmart-server 2>/dev/null | grep -q ': up'; then
+        vesmart_status="$(svstat /service/vesmart-server 2>/dev/null || true)"
+        if printf '%s\n' "$vesmart_status" | grep -Eq '(^|: )up([[:space:]]|$)'; then
             logMessage "WARNING: vesmart-server is running. On the development Pi this interfered with ESP32 BLE discovery. This installer will not stop or disable it; validate the effect on this Venus OS version."
         fi
     fi
