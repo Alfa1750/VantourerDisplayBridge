@@ -69,8 +69,7 @@ The exact package service scripts have been captured in GitHub. The active and p
 
 The SetupHelper v9.7 service-management implementation has now been inspected. Its documented behavior explains this layout: `/opt/victronenergy/service` is persistent storage; Venus OS copies service definitions into the temporary `/service` filesystem at boot. SetupHelper copies package service definitions into both locations during installation and updates the active `run` and `log/run` scripts when an existing service is reinstalled. See `docs/SETUPHELPER_V9.7_REFERENCE.md` for the source-level details.
 
-Still unresolved:
-- Replace the legacy log-directory name `VictronBLE` on the reference Pi with `VantourerDisplayBridge`. The GitHub service snapshot now uses `/var/log/VantourerDisplayBridge`; the live Pi has not yet been changed. Separately verify whether the active logger's `/var/log` destination is correct for this Venus OS system.
+The earlier log-directory naming issue is resolved on the reference Pi. The old directory was renamed, all three log scripts were updated, and the logger was restarted and verified. The `/var/log` path is valid here because `/var/log` is a symlink to `/data/log`. See “Log directory rename completed on reference Pi” below.
 
 ## SetupHelper — partially observed
 
@@ -86,7 +85,7 @@ The exact contents were subsequently read from the Pi and copied into the reposi
 - `run` executes `python3 /data/VantourerDisplayBridge/src/gatt_server.py` and redirects stderr to stdout.
 - `log/run` executes `multilog t s25000 n4 /var/log/VantourerDisplayBridge`.
 
-The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log script on the reference Pi still used the legacy name `/var/log/VictronBLE`. An earlier inventory also found a directory named `/data/log/VictronBLE`. The legacy basename is being replaced in the project configuration with `VantourerDisplayBridge`; the live Pi has not yet been renamed. The `/var/log` versus `/data/log` location must be verified separately before changing the live service. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive listing of `/data/VantourerDisplayBridge/src` (provided Nov 20, 2026) confirms:
+The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log-directory rename on the reference Pi is complete: the former `/data/log/VictronBLE` directory is now `/data/log/VantourerDisplayBridge`, and all three log scripts use `/var/log/VantourerDisplayBridge`. On this system, `/var/log` is a symlink to `/data/log`, so both paths address the same directory. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive listing of `/data/VantourerDisplayBridge/src` (provided Nov 20, 2026) confirms:
 - `gatt_server.py` — 7,367 bytes, modified Nov 20 at 11:05; this is the active source path referenced by the runit `run` script.
 - `gatt_server_backup.py` — 6,912 bytes, modified Nov 20 at 10:54.
 - `gatt_server_v0.3.6.py` — 7,367 bytes, modified Nov 20 at 11:05. Likely a naming/version-control mistake that reused the ESP32 firmware version `v0.3.6`; this is a user-suggested explanation, not yet verified by comparing file contents.
@@ -265,10 +264,10 @@ The upstream SetupHelper v9.7 `ServiceResources` implementation was inspected an
 
 The previous log directory basename `VictronBLE` was an unsuitable name because it could imply an official Victron application. The project-owned name is `VantourerDisplayBridge`.
 
-- The canonical service snapshot `pi-snapshot/services/VantourerDisplayBridge/log/run` has been updated to write to `/var/log/VantourerDisplayBridge`.
-- Historical references in this status document now identify the old `VictronBLE` path as a legacy name, not a separate product or Victron application.
-- The reference Pi has NOT been modified yet. Its active and persistent service copies still require a controlled update.
-- The base-directory question (`/var/log` versus `/data/log`) remains separate and must be verified before applying the new log path on the Pi.
+- The canonical service snapshot `pi-snapshot/services/VantourerDisplayBridge/log/run` writes to `/var/log/VantourerDisplayBridge`.
+- The reference Pi has now been updated: the old log directory was renamed, and the project source, persistent service, and active service log scripts all use the new name.
+- On the reference Pi, `/var/log` is a symlink to `/data/log`; the configured `/var/log/VantourerDisplayBridge` destination therefore resolves to `/data/log/VantourerDisplayBridge`.
+- The ESP32 was subsequently started and the user observed new periodic `Pi -> ESP32: Hallo vanaf Raspberry Pi` records appearing in the renamed `current` log. This verifies that the new logger destination receives live records.
 
 
 ### Log directory rename completed on reference Pi (Nov 20, 2026)
@@ -291,7 +290,7 @@ Verified facts from the user's terminal output:
 - The log service was restarted through its runit control FIFO with `printf u > /service/VantourerDisplayBridge/log/supervise/control`.
 - BusyBox `ps` then showed PID 31388 running `multilog t s25000 n4 /var/log/VantourerDisplayBridge`.
 - The renamed log directory contained the previous rotated files, `current`, `lock`, and `state`. The tail of `current` showed historical test notifications `Pi -> ESP32: Hallo vanaf Raspberry Pi` and the message `ESP32 heeft notifications uitgeschakeld`.
-- The `current` file size was still 13,826 bytes, the same size reported before the rename/restart. Therefore the output confirms that the existing log data was retained and the new multilog process is running, but it does not yet prove that new records were appended after restart.
+- Immediately after the logger restart, the `current` file was still 13,826 bytes. A subsequent ESP32 test produced a continuing stream of new `Pi -> ESP32: Hallo vanaf Raspberry Pi` lines in the renamed log, confirming that new records are appended after restart.
 - An earlier process check found no running `gatt_server.py` process. Do not infer that the BLE server is currently running from the presence of old test messages in the log.
 
 The active and persistent service scripts were not changed by this operation; only their respective `log/run` files were changed. The project snapshot in GitHub already contains the new log path. The reference Pi remains a development system; this operation does not establish clean-install or reboot acceptance.
