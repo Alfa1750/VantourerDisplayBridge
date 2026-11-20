@@ -31,7 +31,7 @@ These are observations from one development device, not yet a complete cross-ver
 
 ## Installation
 
-The setup entry point uses the installed SetupHelper framework and retains its standard install/uninstall prompt. Before installing, it checks for Python 3, the D-Bus/GLib Python bindings, the BlueZ system-bus name, an adapter exposing both GATT and LE advertising managers, and `multilog`. If a preflight check fails, it exits before changing the existing service. SetupHelper v9.7 discovers the service under `services/` and installs it into its persistent and active runit service locations.
+The setup entry point uses the installed SetupHelper framework and retains its standard install/uninstall prompt. Before installing, it checks for Python 3, the D-Bus/GLib Python bindings, the BlueZ system-bus name, a powered adapter exposing GATT and LE advertising managers, and `multilog`. If a preflight check fails, it exits before changing the existing service. SetupHelper v9.7 discovers the service under `services/` and installs it into its persistent and active runit service locations.
 
 Do not consider this package release-ready until the installer has been tested on a separate clean Venus OS test device, including install, update/reinstall, uninstall, and reboot behavior.
 
