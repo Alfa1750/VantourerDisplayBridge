@@ -204,7 +204,7 @@ Files added at the repository root:
 
 The three shell entry scripts were assigned executable Git mode `100755`. The service scripts use the observed Python source path and canonical bounded log path.
 
-**Not yet release-ready:** the GATT source has not been runtime-tested after removal of the test timer; dependency preflight is not implemented; persistent handling of the `vesmart-server` conflict is unresolved; install/update/uninstall/reboot behavior has not been tested on a clean test Pi. The repository is private, which prevents the unauthenticated GitHub archive/raw download path used by SetupHelper PackageManager from accessing this branch. The `gitHubInfo` value is therefore provisional.
+**Not yet release-ready:** the GATT source has not been runtime-tested after removal of the test timer. The setup script now checks Python 3, D-Bus/GLib bindings, BlueZ D-Bus and adapter interfaces, and `multilog` before changing service state; its shell syntax passed a local `bash -n` check. The `log/run` script now creates the log directory before starting multilog; both service scripts passed local `sh -n` checks. Persistent handling of the `vesmart-server` conflict is unresolved; install/update/uninstall/reboot behavior has not been tested on a clean test Pi. The repository is private, which prevents the unauthenticated GitHub archive/raw download path used by SetupHelper PackageManager from accessing this branch. The `gitHubInfo` value is therefore provisional.
 
 No Raspberry Pi files, services, settings, or processes were changed. No Node-RED flow or TCP integration was added.
 
