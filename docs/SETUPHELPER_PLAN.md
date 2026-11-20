@@ -64,3 +64,23 @@ A release candidate is accepted only when all of the following are demonstrated 
 - Back up the complete current project and service state before any modification.
 - Do not stop/disable system services as part of an installer until the behavior has been tested and justified.
 - Do not copy temporary test code into production by accident.
+
+
+## External SetupHelper reference (not a project dependency)
+
+The authoritative framework reference is the public upstream repository:
+- https://github.com/kwindrem/SetupHelper
+- Package development guide: https://github.com/kwindrem/SetupHelper/blob/main/PackageDevelopmentGuidelines.md
+
+We will consult this repository and its documentation only to implement a compatible VantourerDisplayBridge package. We will **not** copy SetupHelper source files into this repository, vendor the framework, or make it part of the bridge's install payload. SetupHelper remains an existing Venus OS package installed separately on the device.
+
+Relevant documented conventions in the upstream v6.0 package guide:
+- A PackageManager package has a version file and an executable setup script; it should also have gitHubInfo containing the GitHub user and default branch.
+- The setup script sources /data/SetupHelper/HelperResources/IncludeHelpers.
+- Setting standardPromptAndActions='yes' before sourcing IncludeHelpers delegates the standard install/uninstall actions to SetupHelper.
+- From SetupHelper v6.0, service directories under the package's services/ directory are automatically installed and tracked for uninstall; the service directory name determines the runit service name.
+- The setup script is expected to support safe install/uninstall/reinstall behavior and use SetupHelper's completion/exit handling.
+
+Important compatibility check still required on the reference Pi: inspect the installed SetupHelper version, gitHubInfo, and relevant local files before relying on the current upstream main documentation. The local package layout strongly resembles the v6+ service-directory convention, but the installed framework version has not yet been confirmed.
+
+The goal is not to reproduce SetupHelper. The goal is to make this project's own package conform to the installed framework's supported package interface.
