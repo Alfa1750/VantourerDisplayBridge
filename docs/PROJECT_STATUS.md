@@ -76,7 +76,12 @@ The recursive listing of `/data/VantourerDisplayBridge/services` (provided Nov 2
 - `/data/VantourerDisplayBridge/services/VantourerDisplayBridge/log/run` — executable, 56 bytes.
 - `/data/VantourerDisplayBridge/services/VantourerDisplayBridge/log/` — directory.
 
-These are the packaged runit service and log-service scripts by their location and naming. Their contents have not yet been inspected, so their exact behavior remains unverified. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive contents of `services/` and `src/` have not yet been captured. No claim is made that a clean installation currently works.
+The exact contents were subsequently read from the Pi and copied into the repository under `pi-snapshot/services/VantourerDisplayBridge/`:
+
+- `run` executes `python3 /data/VantourerDisplayBridge/src/gatt_server.py` and redirects stderr to stdout.
+- `log/run` executes `multilog t s25000 n4 /var/log/VictronBLE`.
+
+The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log script writes to `/var/log/VictronBLE`, whereas an earlier inventory found `/data/log/VictronBLE`; this path discrepancy is unresolved and must be checked before changing anything. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive contents of `services/` and `src/` have not yet been captured. No claim is made that a clean installation currently works.
 
 ## Node-RED / TCP — test completed, integration pending
 
