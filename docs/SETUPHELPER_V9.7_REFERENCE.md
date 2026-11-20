@@ -57,3 +57,59 @@ The guide's example at the `endScript` section uses `INSTALL_SERVICE` (singular)
 - https://github.com/kwindrem/SetupHelper/blob/main/HelperResources/ServiceResources
 - https://github.com/kwindrem/SetupHelper/blob/main/HelperResources/DbusSettingsResources
 - https://github.com/kwindrem/SetupHelper/blob/main/HelperResources/CommonResources
+
+
+## Detailed runit service installation behavior — inspected Nov 20, 2026
+
+The upstream v9.7 `HelperResources/ServiceResources` source was inspected in full around `installService()`, `removeService()`, and the service-directory configuration. This explains the reference Pi's observed directory layout.
+
+### Why there are two separate directories
+
+The helper defines:
+
+```bash
+serviceDir="/opt/victronenergy/service"
+```
+
+Its comments state that, on Venus OS versions starting with v2.90~3, `/service` is mounted as a temporary filesystem (RAM disk). The persistent service definitions live under `/opt/victronenergy/service`; Venus OS copies these into `/service` at boot. They are not symlinks.
+
+This is consistent with the reference Pi observations:
+- Both paths are ordinary directories, not symlinks.
+- The active `/service/VantourerDisplayBridge` contains the runtime `supervise/` directory.
+- The persistent `/opt/victronenergy/service/VantourerDisplayBridge` does not show `supervise/`.
+
+### What SetupHelper does during a first service installation
+
+In `installService()`, v9.7:
+1. Determines the package service source directory (for this package, `services/VantourerDisplayBridge`).
+2. Removes any existing persistent destination directory `/opt/victronenergy/service/VantourerDisplayBridge`.
+3. Copies the package service directory to that persistent destination.
+4. If the active destination `/service/VantourerDisplayBridge` does not exist, copies the package service directory there too.
+5. If the service manager is running, waits up to 10 seconds for automatic startup, then starts the logger/service with `svc -u` if needed. A `down` flag prevents automatic startup.
+
+### What SetupHelper does when the active service directory already exists
+
+The existing-service branch does not replace the entire active directory. It compares and updates the active `log/run` and `run` files individually when their contents differ. It then starts, stops, or restarts the logger and service according to the `down` flag and current runit status.
+
+The persistent destination is refreshed from the package source before this branch. Thus the persistent service definition and active service can be separate physical directories while the important scripts are kept in sync by SetupHelper.
+
+### Uninstall behavior
+
+The helper stops the active service/logger when applicable, removes the persistent service directory, removes the active service directory, and removes the service name from its installed-services tracking list. There is a special case for removing PackageManager from within itself; that exception is not relevant to this project's service.
+
+### What the reference Pi comparison tells us
+
+The user's read-only checks found:
+- Both service paths are separate ordinary directories.
+- The active and persistent `run` files compare byte-for-byte equal (`cmp` exit code 0).
+- The active and persistent `log/run` files compare byte-for-byte equal (`cmp` exit code 0).
+
+Those observations are exactly compatible with SetupHelper v9.7's design. They do not indicate a broken symlink or an accidental duplicate. The active directory is the runtime copy; the persistent directory is the boot-persistent source.
+
+### Project implications
+
+- Keep the canonical service definition in the package at `services/VantourerDisplayBridge/`.
+- Let SetupHelper v9.7 install it using `INSTALL_SERVICES`; do not manually create symlinks between the two Venus OS service paths.
+- Preserve executable permissions on `run` and `log/run` in the package/release process.
+- Do not copy or vendor SetupHelper's own source into this project.
+- Any future installer changes must be tested on a separate test device; the reference Pi remains read-only.
