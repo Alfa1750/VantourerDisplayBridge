@@ -189,6 +189,12 @@ These were test aids. They must be removed, gated, or replaced when production d
 - Alternative Node-RED BLE packages, including Epi Bluetooth, were investigated but not selected.
 - Existing Python BLE GATT server remains the proven BLE foundation.
 
+### External research: `vesmart-server` and newer Venus OS (Nov 20, 2026)
+
+Upstream Victron issue [#1587](https://github.com/victronenergy/venus/issues/1587) documents an older keep-alive behavior that could disconnect BLE devices indiscriminately. The issue says the per-device behavior was changed for the v3.80 release line. Follow-up [#1666](https://github.com/victronenergy/venus/issues/1666) identified defects in the first 0.5.16 implementation and was closed on Sep 14, 2026. Venus OS 3.85 was released on Oct 22, 2026.
+
+This does not establish which `vesmart-server` package version is installed on the reference Pi, nor prove that the specific BLE discovery/connection issue previously observed by the user is resolved. Do not assume the older mass-disconnect bug explains that observation. Do not automatically stop, disable, patch, or replace `vesmart-server`. First identify the installed version and reproduce the exact issue on a separate test device. Any later compatibility action must be reversible and tested for VictronConnect/VE.Smart side effects.
+
 ### Initial SetupHelper package scaffold (Nov 20, 2026)
 
 A first package scaffold has been committed on branch `setuphelper-package` (commit `f9fecd22eabf76bc1057c694ded43b5cec56f7d2`). The `main` branch has not received these package files.
