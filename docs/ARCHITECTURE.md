@@ -1,6 +1,12 @@
 # Architecture
 
-## Intended data path
+## Scope of this repository
+
+This repository contains the Raspberry Pi software for the Vantourer display bridge. It does not contain the JK-BMS monitor or Node-RED flows.
+
+The future JK-BMS monitor will be developed in a separate, independent GitHub repository and installed as a separate SetupHelper/PackageManager package.
+
+## Display data path
 
 ```text
 Venus OS / Victron devices
@@ -8,36 +14,36 @@ Venus OS / Victron devices
         v
 Node-RED Victron nodes and flow logic
         |
-        | TCP (persistent connection; target integration)
+        | TCP (target integration; not yet implemented)
         v
 Python bridge on Raspberry Pi
         |
         | BLE GATT (notifications + writes)
         v
 ESP32-S3 Waveshare 7B display
-
-JK-BMS 1 and JK-BMS 2 ---- BLE directly ----> ESP32-S3
 ```
 
 ## Roles
 
 ### Raspberry Pi / Venus OS
-- BLE Peripheral and GATT Server.
-- Hosts the Python bridge.
+- Runs the Python BLE Peripheral / GATT Server for the ESP32 display.
 - Hosts Node-RED.
-- Intended to connect Node-RED and Python over local TCP.
+- The display bridge and future JK-BMS monitor are separate processes and separate packages.
+- The display bridge must not be a dependency of the JK-BMS monitor, or vice versa.
 - Camper operation must not depend on Wi-Fi.
 
 ### ESP32-S3
-- BLE Central and GATT Client for the Pi bridge.
+- BLE Central and GATT Client for the Pi display bridge.
 - Receives display data through the Pi's TX notification characteristic.
 - Sends commands/data through the Pi's RX write characteristic.
-- Reads JK-BMS devices directly over BLE.
+- Does **not** read the JK-BMS devices in the target architecture.
+- Must not be required for JK-BMS monitoring or charging-protection decisions.
 
 ### Node-RED
 - Uses Victron nodes to collect values from Venus OS.
-- Handles selection/configuration of battery data sources.
-- Exchanges messages with Python bridge over TCP.
+- Receives JK-BMS telemetry from the separate JK-BMS monitor.
+- Owns battery selection, charging-protection logic and Victron charger control.
+- Node-RED flows are imported manually; they are not installed by PackageManager.
 
 ## BLE GATT identifiers
 
@@ -60,15 +66,28 @@ Do not infer that a battery is absent merely because its BLE connection drops. A
 
 ## Transport decisions
 
-- The intended Node-RED ↔ Python transport is TCP.
-- MQTT was investigated but is not the selected display transport.
-- BLE between Pi and ESP32 is already demonstrated.
-- The actual Python TCP client and application protocol are not implemented/verified yet.
+- The intended Node-RED ↔ display-bridge transport is TCP.
+- The display bridge's TCP application integration is not yet implemented/verified.
+- The future JK-BMS monitor will independently connect to both JK-BMS devices over BLE and send telemetry to Node-RED over TCP.
+- The JK-BMS monitor is telemetry-only: it does not decide whether charging is allowed and does not control Victron equipment.
+- MQTT is not required for the initial design. A later Wi-Fi/MQTT transport for the ESP32 display may be considered separately; it must not become a dependency of JK-BMS monitoring or charging protection.
 
-## TCP test details
+## JK-BMS data and charging-protection boundary
 
-A Node-RED TCP server was tested on port 5005 using `node-red-contrib-tcp-client2`. The test confirmed bidirectional TCP behavior with a persistent test client. The exact final deployment endpoint, framing, reconnection behavior, timeout policy, and message schema remain to be specified.
+The JK-BMS monitor will forward only the required information, including BMS identity, temperature, low-temperature charge-block status, high-temperature alarm/status, cell voltages, other alarm states, per-BMS connection state and data freshness.
 
-## Threading/event-loop requirement
+The SmartShunts remain the source of battery current, power and SOC. Venus OS must not register the JK-BMS devices as managed BMS devices; the design must avoid the unwanted DVCC/BMS integration behavior associated with treating them as native BMS devices.
 
-The Python BLE server uses GLib. When TCP integration is implemented, calls that update BLE characteristics from a TCP worker thread must be marshalled safely into the GLib main loop (for example with `GLib.idle_add`), unless the chosen TCP implementation is explicitly integrated with GLib. This is an implementation consideration, not a completed feature.
+Node-RED alone owns the charging decision. The specific purpose of monitoring the low-temperature charge-block state is:
+1. Preventing a false SmartShunt 100% synchronization when one cold BMS blocks charging but the chargers continue charging the other battery.
+2. Preventing a large equalization/inrush current between the parallel batteries if one battery becomes substantially fuller while the other is blocked, then the blocked battery later permits charging again.
+
+When any selected/active battery reports a low-temperature charge block, Node-RED must block all charging sources (Orion XS and both MPPTs). Charging may resume only after all selected/active batteries are confirmed clear and the Node-RED recovery policy permits restart.
+
+The JK-BMS devices retain responsibility for their own cell protection. The external monitor is not intended to replace the BMS's internal protection or to make additional cell-protection decisions.
+
+## TCP framing and reliability
+
+The JK-BMS monitor → Node-RED TCP protocol must define message framing (for example, one JSON object per newline-delimited record), reconnection behavior, per-BMS connection status, timestamps/sequence numbers and stale-data handling. These details must be documented and tested before implementation is considered complete.
+
+The display bridge and JK-BMS monitor must each reconnect independently if Node-RED restarts. Failure of the ESP32 or display BLE link must not affect JK-BMS monitoring or charging-protection decisions.
