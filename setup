@@ -1,3 +1,67 @@
 #!/bin/bash
-standardPromptAndActions='yes'
+
+# Load the installed SetupHelper v9.7 functions.
+# Do not vendor or copy SetupHelper into this package.
 source "/data/SetupHelper/HelperResources/IncludeHelpers"
+
+# PackageManager uses "check" to query package status without changing it.
+if [ "$scriptAction" == "CHECK" ] || [ "$scriptAction" == "EXIT" ]; then
+    exit $EXIT_SUCCESS
+fi
+
+# Keep the standard SetupHelper install/uninstall choices, but perform
+# project-specific prerequisite checks before installing the service.
+if [ "$scriptAction" == "NONE" ]; then
+    standardActionPrompt
+fi
+
+if [ "$scriptAction" == "INSTALL" ]; then
+
+    if ! command -v python3 >/dev/null 2>&1; then
+        setInstallFailed $EXIT_ERROR "Python 3 is required but python3 was not found."
+    fi
+
+    if ! $installFailed && ! command -v multilog >/dev/null 2>&1; then
+        setInstallFailed $EXIT_ERROR "The multilog executable is required but was not found."
+    fi
+
+    if ! $installFailed; then
+        if ! python3 - <<'PY'
+import dbus
+import dbus.service
+import dbus.mainloop.glib
+from gi.repository import GLib
+
+bus = dbus.SystemBus()
+if not bus.name_has_owner("org.bluez"):
+    raise RuntimeError("The system D-Bus name org.bluez is not available")
+
+manager = dbus.Interface(
+    bus.get_object("org.bluez", "/"),
+    "org.freedesktop.DBus.ObjectManager"
+)
+objects = manager.GetManagedObjects()
+if not any(
+    "org.bluez.GattManager1" in interfaces
+    and "org.bluez.LEAdvertisingManager1" in interfaces
+    for interfaces in objects.values()
+):
+    raise RuntimeError("No Bluetooth adapter exposes both GATT and LE advertising managers")
+PY
+        then
+            setInstallFailed $EXIT_ERROR "BLE prerequisites failed: Python D-Bus/GLib bindings, BlueZ system D-Bus, or a compatible BLE adapter are unavailable."
+        fi
+    fi
+
+    # The reference Pi needed vesmart-server stopped for reliable ESP32
+    # discovery. Report its state, but never stop or disable it automatically.
+    if ! $installFailed && command -v svstat >/dev/null 2>&1; then
+        if svstat /service/vesmart-server 2>/dev/null | grep -q ': up'; then
+            logMessage "WARNING: vesmart-server is running. On the development Pi this interfered with ESP32 BLE discovery. This installer will not stop or disable it; validate the effect on this Venus OS version."
+        fi
+    fi
+fi
+
+# SetupHelper v9.7 installs and tracks the service directory automatically.
+# On uninstall, endScript also removes the installed service.
+endScript 'INSTALL_SERVICES'
