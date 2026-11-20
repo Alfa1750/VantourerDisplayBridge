@@ -166,3 +166,17 @@ The current reference Pi is valuable and must remain untouched until a verified 
 ### Backup comparison (inspected Nov 20, 2026)
 
 The Pi file `src/gatt_server_backup.py` was read for comparison only and was **not copied into the deployable repository snapshot**. Compared with the active `gatt_server.py`, the backup has no `notify_timer_id`, no periodic `send_test_notification()` callback, and no two-second test notification. It otherwise contains the same BLE GATT service/advertisement structure and UUIDs. The active `gatt_server.py` remains the source of truth for the working BLE implementation; backup files are not part of the installation payload unless there is a later explicit reason to retain a historical copy.
+
+### Setup entry point captured from Pi
+
+The exact contents of `/data/VantourerDisplayBridge/setup` were read on Nov 20, 2026 and saved as `pi-snapshot/setup`:
+
+```bash
+#!/bin/bash
+
+standardPromptAndActions='yes'
+
+source "/data/SetupHelper/HelperResources/IncludeHelpers"
+```
+
+This script sets `standardPromptAndActions` to `yes` and sources the SetupHelper include file at `/data/SetupHelper/HelperResources/IncludeHelpers`. The behavior of that included file and the SetupHelper framework has not yet been inspected; this entry point alone does not describe the full install procedure.
