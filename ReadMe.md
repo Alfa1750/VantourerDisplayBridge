@@ -9,7 +9,7 @@ This package currently contains the BLE-only bridge foundation:
 - ESP32 acts as BLE Central / GATT Client.
 - Pi-to-ESP32 notifications and ESP32-to-Pi writes use the project's custom GATT service.
 - The service is managed by SetupHelper v9.7 using the package's `services/VantourerDisplayBridge/` directory.
-- Logs are written to `/var/log/VantourerDisplayBridge` and rotated by multilog.
+- Logs are written to `/var/log/VantourerDisplayBridge` and rotated by multilog. The log service creates this directory with `mkdir -p` before starting multilog, so a clean installation does not depend on a manually pre-created log folder.
 
 Node-RED flows and TCP integration are deliberately out of scope for this package phase. Node-RED flows will remain separately maintained and will not be installed or modified by SetupHelper.
 
