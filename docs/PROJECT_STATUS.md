@@ -161,3 +161,8 @@ These were test aids. They must be removed, gated, or replaced when production d
 ## Safety
 
 The current reference Pi is valuable and must remain untouched until a verified backup is made. Do not delete, rename, overwrite, stop, disable, install, or reconfigure anything on it as part of this repository setup.
+
+
+### Backup comparison (inspected Nov 20, 2026)
+
+The Pi file `src/gatt_server_backup.py` was read for comparison only and was **not copied into the deployable repository snapshot**. Compared with the active `gatt_server.py`, the backup has no `notify_timer_id`, no periodic `send_test_notification()` callback, and no two-second test notification. It otherwise contains the same BLE GATT service/advertisement structure and UUIDs. The active `gatt_server.py` remains the source of truth for the working BLE implementation; backup files are not part of the installation payload unless there is a later explicit reason to retain a historical copy.
