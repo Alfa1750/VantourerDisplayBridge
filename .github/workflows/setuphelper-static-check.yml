@@ -25,6 +25,10 @@ jobs:
           bash -n setup
           sh -n services/VantourerDisplayBridge/run
           sh -n services/VantourerDisplayBridge/log/run
+          bash -n tests/setuphelper-harness.sh
+
+      - name: Test SetupHelper control flow with mocked framework
+        run: bash tests/setuphelper-harness.sh
 
       - name: Check Python syntax
         run: python -m py_compile src/gatt_server.py
