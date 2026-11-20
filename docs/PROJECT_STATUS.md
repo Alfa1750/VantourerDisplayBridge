@@ -135,6 +135,11 @@ Read-only checks on the reference Pi returned:
 - `command -v bluetoothd` returned no path because the executable is not in the command search path under that name.
 - System D-Bus lists `org.bluez`, confirming BlueZ is registered on the system bus.
 - `bluetoothctl list` reports one default controller: MAC address `43:45:C0:00:1F:AC`, name `Vantourer`.
+- `bluetoothctl show` reports the controller as public, powered/on, discoverable, and not pairable; alias `Vantourer`; controller name `BlueZ 5.72`.
+- The controller reports both roles: `central` and `peripheral`.
+- The controller's UUID list includes the project's custom service UUID `8f7a0001-6d5b-4c3a-9e2f-1a0b2c3d4e5f`, plus standard Bluetooth profiles. This is an observation from the command output; do not infer from it alone that the ESP32 is currently connected.
+- Advertising capabilities: 1 active instance out of 4 supported; supports TX power, appearance, and local-name includes; maximum advertising and scan-response lengths are both 31 bytes.
+- Discoverable timeout is 0 (no timeout shown); discovery scan is currently inactive (`Discovering: no`).
 - BlueZ daemon version: `5.72`, obtained by running `/usr/libexec/bluetooth/bluetoothd --version`.
 - Full daemon command line read from `/proc/711/cmdline`: `/usr/libexec/bluetooth/bluetoothd -E -f /etc/bluetooth/ble.conf`.
 - The complete contents of `/etc/bluetooth/ble.conf` were read. Active (uncommented) settings in `[General]`:
