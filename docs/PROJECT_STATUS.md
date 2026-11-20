@@ -81,7 +81,13 @@ The exact contents were subsequently read from the Pi and copied into the reposi
 - `run` executes `python3 /data/VantourerDisplayBridge/src/gatt_server.py` and redirects stderr to stdout.
 - `log/run` executes `multilog t s25000 n4 /var/log/VictronBLE`.
 
-The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log script writes to `/var/log/VictronBLE`, whereas an earlier inventory found `/data/log/VictronBLE`; this path discrepancy is unresolved and must be checked before changing anything. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive contents of `services/` and `src/` have not yet been captured. No claim is made that a clean installation currently works.
+The original Pi listing showed both scripts as executable. GitHub's file snapshots preserve their text, but the executable permission must be set explicitly when installing/restoring them. The log script writes to `/var/log/VictronBLE`, whereas an earlier inventory found `/data/log/VictronBLE`; this path discrepancy is unresolved and must be checked before changing anything. The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive listing of `/data/VantourerDisplayBridge/src` (provided Nov 20, 2026) confirms:
+- `gatt_server.py` — 7,367 bytes, modified Nov 20 at 11:05; this is the active source path referenced by the runit `run` script.
+- `gatt_server_backup.py` — 6,912 bytes, modified Nov 20 at 10:54.
+- `gatt_server_v0.3.6.py` — 7,367 bytes, modified Nov 20 at 11:05.
+- `__pycache__/gatt_server.cpython-312.pyc` — compiled Python cache, 14,256 bytes.
+
+The two 7,367-byte Python files have matching sizes and timestamps, but their contents have not yet been compared; do not assume they are identical. The backup is also not yet inspected. The exact source files still need to be read from the Pi and copied into `pi-snapshot/` in GitHub. No claim is made that a clean installation currently works.
 
 ## Node-RED / TCP — test completed, integration pending
 
