@@ -61,11 +61,16 @@ The active Python source was pasted in the conversation, but the live file has n
 
 The runit service `/service/VantourerDisplayBridge` was previously checked with `svstat` and reported `up`.
 
-Pending inspection:
-- Exact contents of `/service/VantourerDisplayBridge/run`.
-- Exact contents of `/data/VantourerDisplayBridge/services/VantourerDisplayBridge`.
-- How the service directory is installed/linked by SetupHelper.
-- Log service configuration and active log destination.
+The exact package service scripts have been captured in GitHub. The active and persistent service directories were subsequently inspected and compared:
+- Both paths are separate ordinary directories, not symlinks.
+- Active and persistent `run` files are byte-for-byte identical (`cmp` exit code 0).
+- Active and persistent `log/run` files are byte-for-byte identical (`cmp` exit code 0).
+- The active directory contains `supervise/`; the persistent directory does not.
+
+The SetupHelper v9.7 service-management implementation has now been inspected. Its documented behavior explains this layout: `/opt/victronenergy/service` is persistent storage; Venus OS copies service definitions into the temporary `/service` filesystem at boot. SetupHelper copies package service definitions into both locations during installation and updates the active `run` and `log/run` scripts when an existing service is reinstalled. See `docs/SETUPHELPER_V9.7_REFERENCE.md` for the source-level details.
+
+Still unresolved:
+- Verify the active log destination and resolve the earlier `/data/log/VictronBLE` versus `/var/log/VictronBLE` discrepancy.
 
 ## SetupHelper — partially observed
 
@@ -249,3 +254,8 @@ The user inspected both service directory types and compared the service scripts
 - `cmp /service/VantourerDisplayBridge/log/run /opt/victronenergy/service/VantourerDisplayBridge/log/run` returned exit code 0: the two `log/run` files are byte-for-byte identical.
 - Thus, the active and persistent service directories are separate directories, while their `run` and `log/run` scripts are identical. The active directory also contains `supervise/`, which was not listed in the persistent directory.
 - No files or service state were changed by these checks.
+
+
+### SetupHelper service-copy mechanism verified (Nov 20, 2026)
+
+The upstream SetupHelper v9.7 `ServiceResources` implementation was inspected and documented in `docs/SETUPHELPER_V9.7_REFERENCE.md`. The reference Pi's separate active/persistent service directories and matching `run` and `log/run` files are consistent with that implementation. No changes were made to the reference Pi.
