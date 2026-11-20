@@ -84,7 +84,7 @@ Do not assume any of these steps are already implemented merely because the rele
 - Runtime dependencies have only been observed on the reference Pi; compatibility checks and installer preflight behavior are not implemented.
 - Safe, persistent handling of the `vesmart-server` BLE conflict remains unresolved and must be validated before release.
 - Python TCP integration and Node-RED flow are intentionally deferred until the SetupHelper package for the current BLE bridge has passed its acceptance criteria.
-- The GitHub repository is private, so PackageManager cannot fetch the branch through its unauthenticated GitHub URLs. A documented SD/USB archive route is now identified for the initial controlled test; this avoids making the repository public. PackageManager's later automatic GitHub downloads/updates will still be unavailable while the repository is private. See `docs/SETUPHELPER_DISTRIBUTION.md`.
+- The required workflow is GUI v1 → SetupHelper / PackageManager → Update. Inspection of SetupHelper v9.7 confirms that PackageManager reads the version from `https://raw.githubusercontent.com/<user>/<package>/<branch>/version` and downloads the archive from `https://github.com/<user>/<package>/archive/<branch>.tar.gz` using `wget` without authentication. The repository is private, so this normal GUI update workflow cannot currently retrieve versions or package archives. SD/USB installation is explicitly not an accepted workaround for this project. Repository access/distribution must be resolved before GUI update testing; do not change repository visibility without the user's explicit approval.
 - The setup entry point now retains SetupHelper's standard install/uninstall prompt and adds a preflight for Python 3, D-Bus/GLib bindings, the BlueZ system-bus name, a powered GATT/LE-advertising-capable adapter, and `multilog`. Preflight failures are marked before any service changes so an existing install is not removed. The service-install rollback path still needs runtime testing on a separate test device.
 
 ## Acceptance criteria
@@ -108,6 +108,10 @@ A release candidate is accepted only when all of the following are demonstrated 
 - Do not stop/disable system services as part of an installer until the behavior has been tested and justified.
 - Do not copy temporary test code into production by accident.
 
+
+## Required update workflow and distribution blocker
+
+The user requires updates exclusively through the standard Venus OS GUI v1 PackageManager flow. Each GitHub change must become available through GUI v1 → SetupHelper → Update; manually transferring SD/USB archives for every development iteration is not acceptable. SetupHelper v9.7 source inspection confirms unauthenticated raw-version and archive-download URLs. The current private repository blocks this flow. Resolve this with the user before proceeding; never make the repository public or create a public mirror without explicit approval.
 
 ## External SetupHelper reference (not a project dependency)
 
