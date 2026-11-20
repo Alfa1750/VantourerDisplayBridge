@@ -35,7 +35,7 @@ The project setup entry point currently shown in conversation sources SetupHelpe
 Development is taking place on the separate branch `setuphelper-package`; `main` remains unchanged by the package scaffold.
 
 The branch now has the initial package-root layout:
-- `setup` — executable SetupHelper entry point using the verified v9.7 `standardPromptAndActions='yes'` convention.
+- `setup` — executable SetupHelper v9.7 entry point. It deliberately does **not** set `standardPromptAndActions='yes'`, because that would run SetupHelper's automatic completion path before the package-specific preflight. Instead it calls `standardActionPrompt` when needed, performs the preflight, and then calls `endScript 'INSTALL_SERVICES'`.
 - `version` — currently `v0.1d`, matching the version marker observed on the reference Pi.
 - `gitHubInfo` — provisional value `Alfa1750:setuphelper-package`.
 - `src/gatt_server.py` — captured BLE GATT server with the periodic test notification code removed.
