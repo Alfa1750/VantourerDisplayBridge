@@ -237,3 +237,15 @@ The user ran read-only directory listings and a service status check on the refe
 - The ESP32, by contrast, was able to connect directly to `VantourerDisplayBridge` without first pairing through LightBlue.
 - This records the observed behavior of those two clients. It does not establish that the GATT service or UUIDs are technically hidden until pairing; that may also depend on LightBlue's discovery/display behavior or the security configuration.
 - Do not treat PIN pairing as a required prerequisite for the ESP32 connection unless later tests establish that requirement.
+
+
+### Active versus persistent runit service comparison (checked Nov 20, 2026)
+
+The user inspected both service directory types and compared the service scripts on the reference Pi:
+
+- `ls -ld /service/VantourerDisplayBridge` reports a normal directory (`drwxr-xr-x`), not a symlink.
+- `ls -ld /opt/victronenergy/service/VantourerDisplayBridge` also reports a normal directory (`drwxr-xr-x`), not a symlink.
+- `cmp /service/VantourerDisplayBridge/run /opt/victronenergy/service/VantourerDisplayBridge/run` returned exit code 0: the two `run` files are byte-for-byte identical.
+- `cmp /service/VantourerDisplayBridge/log/run /opt/victronenergy/service/VantourerDisplayBridge/log/run` returned exit code 0: the two `log/run` files are byte-for-byte identical.
+- Thus, the active and persistent service directories are separate directories, while their `run` and `log/run` scripts are identical. The active directory also contains `supervise/`, which was not listed in the persistent directory.
+- No files or service state were changed by these checks.
