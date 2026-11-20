@@ -25,7 +25,7 @@ The final installer must be based on inspected, tested requirements. Likely area
 4. Install project files into the intended data directory.
 5. Install runit service files and configure log handling.
 6. Enable/start service using the supported SetupHelper/Venus OS conventions.
-7. Handle the `vesmart-server` BLE conflict only after its necessity, persistence, and side effects are verified.
+7. Implement and test persistent handling of the `vesmart-server` BLE conflict: it was only stopped manually on the reference Pi, it restarts after reboot, and the persistent handling must be version-controlled in this repository. Verify side effects before disabling it; necessity on other Venus OS versions remains unknown until tested after an OS update.
 8. Configure Node-RED TCP endpoint/port and document matching flow setup.
 9. Provide safe update/reinstall behavior.
 10. Provide a documented removal/rollback strategy if supported by SetupHelper conventions.
