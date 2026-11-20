@@ -30,6 +30,22 @@ Observed paths on the development Pi:
 
 The project setup entry point currently shown in conversation sources SetupHelper's `IncludeHelpers`. The exact full setup option and helper calls have not yet been captured.
 
+## Initial package scaffold created (Nov 20, 2026)
+
+Development is taking place on the separate branch `setuphelper-package`; `main` remains unchanged by the package scaffold.
+
+The branch now has the initial package-root layout:
+- `setup` — executable SetupHelper entry point using the verified v9.7 `standardPromptAndActions='yes'` convention.
+- `version` — currently `v0.1d`, matching the version marker observed on the reference Pi.
+- `gitHubInfo` — provisional value `Alfa1750:setuphelper-package`.
+- `src/gatt_server.py` — captured BLE GATT server with the periodic test notification code removed.
+- `services/VantourerDisplayBridge/run` and `services/VantourerDisplayBridge/log/run` — service definitions using the canonical project paths and bounded multilog configuration.
+- `ReadMe.md` — package scope, observed runtime prerequisites, and development limitations.
+
+The executable mode `100755` was assigned in the Git tree to `setup`, `services/VantourerDisplayBridge/run`, and `services/VantourerDisplayBridge/log/run`.
+
+This is only a scaffold, not a completed or tested installer. The GATT source has not yet been run after removal of the test notification code. No files have been installed on or copied to the Raspberry Pi.
+
 ## Installer responsibilities to establish
 
 The final installer must be based on inspected, tested requirements. Likely areas to verify and implement:
@@ -49,13 +65,15 @@ Do not assume any of these steps are already implemented merely because the rele
 
 ## Current blockers
 
-- Full SetupHelper option directory not captured.
+- Full SetupHelper option directory and its complete on-device installation lifecycle are not yet captured.
 - Full project source tree not captured.
-- The complete service directory has not yet been captured; the active service `run` and `log/run` scripts have been captured in the repository.
+- The service `run` and `log/run` scripts are now included in the package scaffold; runtime installation and executable-mode preservation still need validation on a separate test device.
 - The active, persistent, and project-copy `log/run` scripts on the reference Pi now use `/var/log/VantourerDisplayBridge`; the log directory rename and live logging test are complete. Installer behavior still needs to reproduce this correctly on a clean test Pi.
-- Runtime dependencies not inventoried.
-- Bluetooth and `vesmart-server` state not fully documented.
+- Runtime dependencies have only been observed on the reference Pi; compatibility checks and installer preflight behavior are not implemented.
+- Safe, persistent handling of the `vesmart-server` BLE conflict remains unresolved and must be validated before release.
 - Python TCP integration and Node-RED flow are intentionally deferred until the SetupHelper package for the current BLE bridge has passed its acceptance criteria.
+- The GitHub repository is private. SetupHelper PackageManager uses unauthenticated GitHub raw/archive URLs, so the provisional `gitHubInfo` branch cannot be downloaded by PackageManager while the repository remains private. Distribution must be resolved before PackageManager installation can be tested.
+- The setup entry point currently delegates to SetupHelper's standard actions; custom dependency preflight and explicit failure/rollback handling have not yet been added.
 
 ## Acceptance criteria
 
