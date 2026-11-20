@@ -69,7 +69,7 @@ Pending inspection:
 
 ## SetupHelper — partially observed
 
-The setup option and project paths exist as listed above. The complete contents of `/data/setupOptions/VantourerDisplayBridge` and the project service directory have not yet been captured. No claim is made that a clean installation currently works.
+The setup option and project paths exist as listed above. The directory `/data/setupOptions/VantourerDisplayBridge` was listed and contained only an empty `optionsSet` file (observed Nov 20, 2026). The project root `/data/VantourerDisplayBridge` was listed and contained `ReadMe.md` (222 bytes), `services/`, `setup` (103 bytes), `src/`, and `version` (6 bytes). The recursive contents of `services/` and `src/` have not yet been captured. No claim is made that a clean installation currently works.
 
 ## Node-RED / TCP — test completed, integration pending
 
