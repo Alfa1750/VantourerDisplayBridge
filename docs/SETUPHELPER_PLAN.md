@@ -46,6 +46,18 @@ The executable mode `100755` was assigned in the Git tree to `setup`, `services/
 
 This is only a scaffold, not a completed or tested installer. The GATT source has not yet been run after removal of the test notification code. No files have been installed on or copied to the Raspberry Pi.
 
+## External finding: vesmart-server behavior in newer Venus OS (Nov 20, 2026)
+
+Upstream Victron issue [#1587](https://github.com/victronenergy/venus/issues/1587) documented a keep-alive bug in older `vesmart-server` releases that could disconnect BLE devices indiscriminately. The issue discussion says the per-device behavior was changed for the v3.80 release line. Follow-up issue [#1666](https://github.com/victronenergy/venus/issues/1666) documented defects in the first 0.5.16 implementation; that follow-up was subsequently closed on Sep 14, 2026. Venus OS 3.85 was released on Oct 22, 2026.
+
+This does **not** prove that the discovery/connection interference observed on this project's Raspberry Pi 3B+ running Venus OS 3.85 has disappeared: the exact installed `vesmart-server` package version and the precise failure mode behind the user's earlier observation have not been captured. It does, however, mean that disabling `vesmart-server` should not be treated as a default requirement based only on older reports of the 60-second mass-disconnect bug.
+
+Current package policy remains conservative:
+- Never stop, disable, patch, or replace `vesmart-server` automatically.
+- Keep the installer warning informational only.
+- On a separate test device, first identify the installed package version and reproduce the exact BLE discovery/connection symptom.
+- Only add an optional, reversible compatibility action if testing demonstrates it is still necessary on the target Venus OS version, and document VictronConnect/VE.Smart side effects.
+
 ## Installer responsibilities to establish
 
 The final installer must be based on inspected, tested requirements. Likely areas to verify and implement:
