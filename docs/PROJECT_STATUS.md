@@ -4,7 +4,11 @@
 
 ## Target outcome
 
-A clean Raspberry Pi running Venus OS must be installable through SetupHelper. The installation must install/configure dependencies, Bluetooth prerequisites, the Python bridge, runit service, Node-RED integration, and required system settings. It must survive reboot and pass end-to-end tests.
+## Agreed development order (Nov 20, 2026)
+
+SetupHelper is the immediate priority. Complete and validate the SetupHelper package for the current BLE-only bridge before beginning Node-RED/TCP development. During this phase, do not implement Python TCP integration or modify/import Node-RED flows. Node-RED flow files remain independently version-controlled and outside SetupHelper. Once the SetupHelper phase is accepted, proceed with Node-RED/TCP integration and update the package later if the bridge gains new runtime components.
+
+A clean Raspberry Pi running Venus OS must be installable through SetupHelper. Phase 1 is to install/configure dependencies, Bluetooth prerequisites, the current Python BLE bridge, runit service, logging, and required system settings through SetupHelper. Node-RED/TCP integration is deliberately deferred until this SetupHelper package has passed its own clean-install, update, uninstall, and reboot acceptance tests. Node-RED flows remain separate from the installer.
 
 ## Confirmed repository/account facts
 
@@ -187,18 +191,26 @@ These were test aids. They must be removed, gated, or replaced when production d
 
 ## Remaining implementation work
 
-1. Capture the exact active Pi project and SetupHelper files.
-2. Capture and review the active runit service script and log configuration.
-3. Verify the `vesmart-server` state and reboot behavior.
-4. Identify all runtime dependencies and OS/BlueZ assumptions.
-5. Implement the persistent TCP client in the Python bridge.
-6. Define and document the bidirectional message protocol.
-7. Connect Node-RED messages to BLE notifications and BLE writes to Node-RED.
-8. Export and document the final Node-RED flow.
-9. Capture ESP32 source/version separately.
-10. Implement the complete SetupHelper install/update/uninstall behavior as appropriate.
-11. Test upgrade/reinstall and reboot behavior.
-12. Test from a clean Pi.
+### Phase 1 — SetupHelper (do this first)
+
+1. Capture the exact active Pi project and SetupHelper package files.
+2. Complete and review the package structure, setup script, version, and gitHubInfo.
+3. Identify all runtime dependencies and OS/BlueZ assumptions.
+4. Verify the `vesmart-server` conflict, safe handling, side effects, and reboot behavior.
+5. Implement complete SetupHelper install/update/uninstall behavior for the current BLE bridge.
+6. Test upgrade/reinstall, removal/rollback, service startup after reboot, and bounded logging.
+7. Validate the package on a separate clean test Pi. Do not use the only working reference Pi as the first installer test.
+
+### Phase 2 — Node-RED/TCP (only after Phase 1 passes)
+
+1. Implement the persistent TCP client in the Python bridge.
+2. Define and document the bidirectional message protocol.
+3. Connect Node-RED messages to BLE notifications and BLE writes to Node-RED.
+4. Export and document the final Node-RED flow separately from SetupHelper.
+
+### Separate work
+
+- Capture ESP32 source/version separately.
 
 ## Safety
 
