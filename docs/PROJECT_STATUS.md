@@ -229,3 +229,11 @@ The user ran read-only directory listings and a service status check on the refe
 - Both active and persistent directories therefore exist, and both list an executable `run` file of the same size. The output did **not** compare the contents or establish whether the active directory is a symlink or a copy of the persistent directory. Do not infer that the two `run` files are identical from equal file sizes.
 - The `supervise/` directory is present in the active service directory; this is consistent with runit supervision state being maintained for the active service. Its absence from the persistent directory listing is not itself an error.
 - Next verification, if needed: inspect `ls -ld` for both paths and compare the two `run` and `log/run` files with `cmp` or `md5sum`. This can be done read-only; do not modify service files or restart the service.
+
+
+### BLE client discovery and pairing observations (user-reported, Nov 20, 2026)
+
+- In the LightBlue app, the user could see the custom GATT UUIDs only after connecting to the Pi's BLE device `Vantourer` using a PIN.
+- The ESP32, by contrast, was able to connect directly to `VantourerDisplayBridge` without first pairing through LightBlue.
+- This records the observed behavior of those two clients. It does not establish that the GATT service or UUIDs are technically hidden until pairing; that may also depend on LightBlue's discovery/display behavior or the security configuration.
+- Do not treat PIN pairing as a required prerequisite for the ESP32 connection unless later tests establish that requirement.
