@@ -45,12 +45,25 @@ manager = dbus.Interface(
     "org.freedesktop.DBus.ObjectManager"
 )
 objects = manager.GetManagedObjects()
-if not any(
-    "org.bluez.GattManager1" in interfaces
-    and "org.bluez.LEAdvertisingManager1" in interfaces
-    for interfaces in objects.values()
-):
-    raise RuntimeError("No Bluetooth adapter exposes both GATT and LE advertising managers")
+adapter_path = None
+for path, interfaces in objects.items():
+    if (
+        "org.bluez.GattManager1" in interfaces
+        and "org.bluez.LEAdvertisingManager1" in interfaces
+        and "org.bluez.Adapter1" in interfaces
+    ):
+        adapter_path = path
+        break
+
+if adapter_path is None:
+    raise RuntimeError("No Bluetooth adapter exposes GATT, LE advertising, and Adapter1")
+
+properties = dbus.Interface(
+    bus.get_object("org.bluez", adapter_path),
+    "org.freedesktop.DBus.Properties"
+)
+if not bool(properties.Get("org.bluez.Adapter1", "Powered")):
+    raise RuntimeError("The Bluetooth adapter is not powered on")
 PY
         then
             setInstallFailed $EXIT_ERROR "BLE prerequisites failed: Python D-Bus/GLib bindings, BlueZ system D-Bus, or a compatible BLE adapter are unavailable."
