@@ -169,35 +169,17 @@ These were test aids. They must be removed, gated, or replaced when production d
 The current reference Pi is valuable and must remain untouched until a verified backup is made. Do not delete, rename, overwrite, stop, disable, install, or reconfigure anything on it as part of this repository setup.
 
 
-### Backup comparison (inspected Nov 20, 2026)
+### Python source comparison (inspected Nov 20, 2026)
 
-The Pi file `src/gatt_server_backup.py` was read for comparison only and was **not copied into the deployable repository snapshot**. Compared with the active `gatt_server.py`, the backup has no `notify_timer_id`, no periodic `send_test_notification()` callback, and no two-second test notification. It otherwise contains the same BLE GATT service/advertisement structure and UUIDs. The active `gatt_server.py` remains the source of truth for the working BLE implementation; backup files are not part of the installation payload unless there is a later explicit reason to retain a historical copy.
+The user ran a byte comparison on the reference Pi between the active `src/gatt_server.py` and the two other Python files:
 
-### Setup entry point captured from Pi
+- `gatt_server_v0.3.6.py` is **byte-for-byte identical** to the active `gatt_server.py` (`cmp -s` returned identical). It is not a distinct implementation. Its filename should not be treated as evidence that the Python bridge has version `v0.3.6`; that version belongs to the ESP32 project.
+- `gatt_server_backup.py` differs from the active file only in the test-notification additions shown by the user's `diff -u` output:
+  - The active file initializes `self.notify_timer_id = None`; the backup does not.
+  - The active `StartNotify()` starts a two-second GLib timer; the backup does not.
+  - The active file defines `send_test_notification()`, which sends `Hallo vanaf Raspberry Pi`; the backup does not.
+- No other differences appeared in the supplied unified diff. This establishes that the backup retains the same BLE structure while omitting the periodic test notification code.
+- The `md5sum` command was included in the user's terminal output, but its resulting checksum lines were not included in the pasted output. No checksum values are recorded.
 
-The exact contents of `/data/VantourerDisplayBridge/setup` were read on Nov 20, 2026 and saved as `pi-snapshot/setup`:
+The active `gatt_server.py` remains the file used by the runit service and is already captured as `pi-snapshot/src/gatt_server.py`. The `v0.3.6` duplicate does not need a separate source snapshot. The backup file's complete contents have not yet been captured into GitHub; preserve it as a historical reference only if/when its exact contents are copied from the Pi. Do not substitute it for the active source without an explicit decision.
 
-```bash
-#!/bin/bash
-
-standardPromptAndActions='yes'
-
-source "/data/SetupHelper/HelperResources/IncludeHelpers"
-```
-
-This script sets `standardPromptAndActions` to `yes` and sources the SetupHelper include file at `/data/SetupHelper/HelperResources/IncludeHelpers`. The behavior of that included file and the SetupHelper framework has not yet been inspected; this entry point alone does not describe the full install procedure.
-
-### Project README captured from Pi
-
-The exact contents of `/data/VantourerDisplayBridge/ReadMe.md` were read on Nov 20, 2026 and saved as `pi-snapshot/ReadMe.md`. It describes the project as a BLE GATT server for communication between Venus OS / Node-RED and an ESP32-based Victron display, with the Raspberry Pi as BLE Peripheral / GATT Server and ESP32 as BLE Central / GATT Client. It states that communication is bidirectional. This README is a short architectural description; it does not document installation or the TCP integration, which is not present in the captured active Python source.
-
-
-### Python bridge version marker captured from Pi
-
-The exact contents of `/data/VantourerDisplayBridge/version` were read on Nov 20, 2026 and saved as `pi-snapshot/version`: `v0.1d`. This is the Python bridge package's version marker, separate from the ESP32 firmware/project version `v0.3.6`.
-
-### SetupHelper installation framework inventory (Pi, Nov 20 2026)
-
-A directory listing of `/data/SetupHelper` confirms the framework is present and contains `.github/`, `FileSets/`, `HelperResources/`, `blindInstall/`, `services/`, and `velib_python/`, plus files including `PackageManager.py`, `PackageDevelopmentGuidelines.md`, `ReadMe.md`, `defaultPackageList`, `forSetupScript`, `genericSetupScript`, `setup`, `updatePackage`, and other framework utilities/archives. `CommonResources` is a symlink to `HelperResources/IncludeHelpers`.
-
-The listing also shows a framework version file (`version`, 8 bytes) and package archives. This is a third-party/shared SetupHelper framework, not part of the VantourerDisplayBridge package itself. We are inventorying only the specific helper files and package conventions needed to understand and reproduce this package's installation; we are not copying the entire framework into the VantourerDisplayBridge repository.
