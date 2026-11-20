@@ -73,7 +73,7 @@ Do not assume any of these steps are already implemented merely because the rele
 - Safe, persistent handling of the `vesmart-server` BLE conflict remains unresolved and must be validated before release.
 - Python TCP integration and Node-RED flow are intentionally deferred until the SetupHelper package for the current BLE bridge has passed its acceptance criteria.
 - The GitHub repository is private. SetupHelper PackageManager uses unauthenticated GitHub raw/archive URLs, so the provisional `gitHubInfo` branch cannot be downloaded by PackageManager while the repository remains private. Distribution must be resolved before PackageManager installation can be tested.
-- The setup entry point currently delegates to SetupHelper's standard actions; custom dependency preflight and explicit failure/rollback handling have not yet been added.
+- The `setuphelper-package` branch now uses the standard SetupHelper install/uninstall prompt with a project-specific preflight for Python 3, D-Bus/GLib bindings, the BlueZ system-bus name, a GATT/LE-advertising-capable adapter, and `multilog`. Preflight failures are guarded so an existing service installation is not removed. The script's runtime behavior and rollback still require testing on a separate test device.
 
 ## Acceptance criteria
 
