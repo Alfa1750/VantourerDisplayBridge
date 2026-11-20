@@ -268,6 +268,7 @@ The previous log directory basename `VictronBLE` was an unsuitable name because 
 - The reference Pi has now been updated: the old log directory was renamed, and the project source, persistent service, and active service log scripts all use the new name.
 - On the reference Pi, `/var/log` is a symlink to `/data/log`; the configured `/var/log/VantourerDisplayBridge` destination therefore resolves to `/data/log/VantourerDisplayBridge`.
 - The ESP32 was subsequently started and the user observed new periodic `Pi -> ESP32: Hallo vanaf Raspberry Pi` records appearing in the renamed `current` log. This verifies that the new logger destination receives live records.
+- Log retention is bounded by the active `multilog t s25000 n4` configuration: each current log is rotated at approximately 25,000 bytes; when rotation produces four old log files, the oldest is deleted. In steady state this leaves at most three rotated files plus `current` (approximately 100 kB total log data, subject to line-boundary overshoot).
 
 
 ### Log directory rename completed on reference Pi (Nov 20, 2026)
