@@ -15,7 +15,7 @@ Node-RED flows and TCP integration are deliberately out of scope for this packag
 
 ## Package status
 
-This is a development branch, not a release. The GitHub repository is currently private, so the GX PackageManager cannot download this branch through the unauthenticated GitHub archive/raw URLs used by SetupHelper. The `gitHubInfo` value is provisional until a distribution method is agreed.
+This is a development branch, not a release. The GitHub repository is currently private, so the GX PackageManager cannot download this branch through the unauthenticated GitHub archive/raw URLs it uses. **A removable-media route is available for controlled testing:** download the branch's `.tar.gz` archive while signed in to GitHub, place it unchanged on SD/USB media, and name it according to the PackageManager convention. See [docs/SETUPHELPER_DISTRIBUTION.md](docs/SETUPHELPER_DISTRIBUTION.md). This enables a local package transfer/install test without making the repository public; it does not enable PackageManager's later automatic downloads or updates from the private repository. The `gitHubInfo` value remains `Alfa1750:setuphelper-package` for future use if repository access is resolved.
 
 The BLE source in this package is based on the captured active reference-Pi source. The temporary periodic `Hallo vanaf Raspberry Pi` test notification has been removed. No production telemetry or TCP/Node-RED integration is implemented yet.
 
