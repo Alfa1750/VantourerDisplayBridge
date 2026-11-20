@@ -184,3 +184,8 @@ This script sets `standardPromptAndActions` to `yes` and sources the SetupHelper
 ### Project README captured from Pi
 
 The exact contents of `/data/VantourerDisplayBridge/ReadMe.md` were read on Nov 20, 2026 and saved as `pi-snapshot/ReadMe.md`. It describes the project as a BLE GATT server for communication between Venus OS / Node-RED and an ESP32-based Victron display, with the Raspberry Pi as BLE Peripheral / GATT Server and ESP32 as BLE Central / GATT Client. It states that communication is bidirectional. This README is a short architectural description; it does not document installation or the TCP integration, which is not present in the captured active Python source.
+
+
+### Python bridge version marker captured from Pi
+
+The exact contents of `/data/VantourerDisplayBridge/version` were read on Nov 20, 2026 and saved as `pi-snapshot/version`: `v0.1d`. This is the Python bridge package's version marker, separate from the ESP32 firmware/project version `v0.3.6`.
