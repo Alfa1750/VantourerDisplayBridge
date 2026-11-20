@@ -136,6 +136,11 @@ Read-only checks on the reference Pi returned:
 - System D-Bus lists `org.bluez`, confirming BlueZ is registered on the system bus.
 - BlueZ daemon version: `5.72`, obtained by running `/usr/libexec/bluetooth/bluetoothd --version`.
 - Full daemon command line read from `/proc/711/cmdline`: `/usr/libexec/bluetooth/bluetoothd -E -f /etc/bluetooth/ble.conf`.
+- The complete contents of `/etc/bluetooth/ble.conf` were read. Active (uncommented) settings in `[General]`:
+  - `ReverseServiceDiscovery = false`
+  - `Privacy = device`
+  - `ControllerMode = le`
+- Other displayed settings in that file are commented examples/default references, including `EnableLE` and `AttributeServer`; they are not active settings in this configuration file.
 - `/service/VantourerDisplayBridge`: reported `up`, PID 20694, uptime 27805 seconds at the time of the check.
 - `/service/vesmart-server`: reported `down 30099 seconds, normally up`. This confirms it was currently down while its runit configuration says it is normally up. The user has clarified that it was manually stopped, not persistently disabled; it is expected to start again after reboot.
 
