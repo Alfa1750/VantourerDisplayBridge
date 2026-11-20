@@ -1,4 +1,4 @@
-# VictronBLE
+# VantourerDisplayBridge
 
 BLE GATT server for communication between Venus OS / Node-RED
 and an ESP32-based Victron display.
