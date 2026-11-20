@@ -189,6 +189,25 @@ These were test aids. They must be removed, gated, or replaced when production d
 - Alternative Node-RED BLE packages, including Epi Bluetooth, were investigated but not selected.
 - Existing Python BLE GATT server remains the proven BLE foundation.
 
+### Initial SetupHelper package scaffold (Nov 20, 2026)
+
+A first package scaffold has been committed on branch `setuphelper-package` (commit `f9fecd22eabf76bc1057c694ded43b5cec56f7d2`). The `main` branch has not received these package files.
+
+Files added at the repository root:
+- `setup` — executable standard SetupHelper v9.7 entry point.
+- `version` — `v0.1d`.
+- `gitHubInfo` — provisional `Alfa1750:setuphelper-package`.
+- `ReadMe.md`.
+- `src/gatt_server.py` — based on the captured active BLE GATT source, with the periodic `Hallo vanaf Raspberry Pi` test-notification timer removed.
+- `services/VantourerDisplayBridge/run`.
+- `services/VantourerDisplayBridge/log/run`.
+
+The three shell entry scripts were assigned executable Git mode `100755`. The service scripts use the observed Python source path and canonical bounded log path.
+
+**Not yet release-ready:** the GATT source has not been runtime-tested after removal of the test timer; dependency preflight is not implemented; persistent handling of the `vesmart-server` conflict is unresolved; install/update/uninstall/reboot behavior has not been tested on a clean test Pi. The repository is private, which prevents the unauthenticated GitHub archive/raw download path used by SetupHelper PackageManager from accessing this branch. The `gitHubInfo` value is therefore provisional.
+
+No Raspberry Pi files, services, settings, or processes were changed. No Node-RED flow or TCP integration was added.
+
 ## Remaining implementation work
 
 ### Phase 1 — SetupHelper (do this first)
