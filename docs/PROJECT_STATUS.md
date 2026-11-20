@@ -134,6 +134,7 @@ Read-only checks on the reference Pi returned:
 - `bluetoothctl` and `btmgmt` are available at `/usr/bin/bluetoothctl` and `/usr/bin/btmgmt`.
 - `command -v bluetoothd` returned no path because the executable is not in the command search path under that name.
 - System D-Bus lists `org.bluez`, confirming BlueZ is registered on the system bus.
+- `bluetoothctl list` reports one default controller: MAC address `43:45:C0:00:1F:AC`, name `Vantourer`.
 - BlueZ daemon version: `5.72`, obtained by running `/usr/libexec/bluetooth/bluetoothd --version`.
 - Full daemon command line read from `/proc/711/cmdline`: `/usr/libexec/bluetooth/bluetoothd -E -f /etc/bluetooth/ble.conf`.
 - The complete contents of `/etc/bluetooth/ble.conf` were read. Active (uncommented) settings in `[General]`:
