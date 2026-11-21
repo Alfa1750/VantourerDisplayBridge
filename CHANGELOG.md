@@ -17,3 +17,12 @@ This changelog tracks the **Raspberry Pi VantourerDisplayBridge software** in th
 - v0.2.0 is reserved for the verified functional-parity milestone.
 - ESP32 firmware has its own independent version numbering. ESP32 firmware v0.3.6 is unrelated to Pi software v0.1.0.
 - Node-RED flows and future JK-BMS monitor software have their own independent version histories.
+
+## Development and recovery-point rules
+
+- A new distinct Pi development step receives its version number when that step begins.
+- Keep that version number unchanged during all edits, debugging and repeated tests within the same step. Do not create a new version for every test or code correction.
+- Record meaningful intermediate changes with Git commits.
+- When a step is successfully tested and accepted, create a Git tag for that version. The tag is a known-good recovery point.
+- Increment to the next patch version only when beginning the next distinct development step.
+- Keep unfinished development off the PackageManager installation branch. Only promote approved, tested versions to the branch PackageManager reads; verify the actual SetupHelper branch configuration before using this workflow.
