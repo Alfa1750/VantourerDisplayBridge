@@ -1,19 +1,19 @@
 # Changelog
 
-All notable project changes will be recorded here.
+This changelog tracks the **Raspberry Pi VantourerDisplayBridge software** in this repository. It does not track ESP32 firmware versions.
 
-## Unreleased
+## v0.1.0 — GitHub Pi software baseline
 
-### Added
-- Private GitHub repository created.
-- Initial project overview, architecture, decisions, reconstructed status, test register, and SetupHelper acceptance plan.
+- Establish the current Raspberry Pi-side software state represented in this GitHub branch as the first consistently versioned baseline.
+- This is a repository/Pi-software baseline, not a claim that the SetupHelper package has reached functional parity with the manually developed Pi implementation.
+- Subsequent Pi-side development increments the patch version: v0.1.1, v0.1.2, v0.1.3, and so on.
+- When the GitHub Pi implementation has reached functional parity with the manually developed reference implementation, mark that milestone as v0.2.0.
 
-### Not yet included
-- Live Raspberry Pi source files.
-- Complete SetupHelper installer.
-- Active runit service files.
-- Node-RED flow export.
-- ESP32 source project.
-- Verified system configuration and dependency inventory.
+## Versioning rules
 
-This initial repository baseline is documentation only; it is not an installable release.
+- The root version file is the PackageManager version marker for the Raspberry Pi software.
+- Pi software development before this baseline was performed through manual changes without a consistent versioning scheme. Do not retroactively assign those changes ESP32 version numbers.
+- v0.1.x is the development series leading toward functional parity with the manual Pi implementation.
+- v0.2.0 is reserved for the verified functional-parity milestone.
+- ESP32 firmware has its own independent version numbering. ESP32 firmware v0.3.6 is unrelated to Pi software v0.1.0.
+- Node-RED flows and future JK-BMS monitor software have their own independent version histories.
