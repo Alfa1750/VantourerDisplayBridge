@@ -122,3 +122,19 @@ The original Pi-side development was performed through manual changes without co
 Every subsequent Pi-side development step increments the patch version in sequence: **v0.1.1, v0.1.2, v0.1.3**, etc. The **v0.2.0** version is reserved for the explicit milestone at which the GitHub Pi implementation has reached functional parity with the manually developed Pi reference implementation. Do not declare v0.2.0 until that parity has been checked and confirmed.
 
 ESP32 firmware versioning remains completely independent; ESP32 v0.3.6 does not identify a Pi software or PackageManager release. See [CHANGELOG.md](../CHANGELOG.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
+## D-025 — Step-based Pi versioning and tested recovery points
+**Status:** Adopted
+
+Pi software versions represent distinct, meaningful development steps, not individual test attempts.
+
+- The current baseline is **v0.1.0**.
+- When a new development step begins, assign its version number immediately (for example **v0.1.1**). Keep that same version number throughout all coding, debugging, and repeated tests belonging to that step. Do not increment the version for every code edit or test attempt.
+- Record meaningful code changes and intermediate states as Git commits. Commits preserve the exact history within a development step.
+- When a step has been tested successfully and is accepted as a working state, create a Git tag for that version. This tag is a known-good recovery point.
+- Only when beginning the next distinct development step, increment the patch version (for example v0.1.2, then v0.1.3). If a step does not work, continue correcting and testing under its existing version number.
+- Preserve all known-good tags so development can return to the most recent working intermediate step. Do not move or overwrite an existing version tag.
+- The PackageManager installation branch must expose only approved, tested versions. Development commits and unfinished work must remain on a separate development branch until accepted and deliberately promoted to the installation branch. Confirm the branch configuration used by SetupHelper before relying on this separation.
+- The ESP32 firmware version history remains independent of Pi software versioning.
+
+A version number therefore identifies a development step; a Git commit identifies an exact code state within that step; and a Git tag identifies an accepted, known-good state.
