@@ -111,3 +111,14 @@ The reverse text direction had also been tested: the Pi received/logged `Hallo v
 This does **not** prove that actual Victron commands were forwarded to Node-RED or that MPPT/Orion controls were tested. It also does not mean the future binary display-frame format or its fragmentation is implemented. See [BLE_DISPLAY_PROTOCOL.md](BLE_DISPLAY_PROTOCOL.md) for the detailed test history and the distinction between the proven ESP32 v0.3.6 text transport and the future binary protocol design.
 
 **Do not repeat the 20-byte truncation investigation or reimplement this ESP32-side fix without first inspecting the ESP32 v0.3.6 reference code. Preserve the manually developed Pi implementation separately when bringing the SetupHelper/PackageManager Pi package to parity.**
+
+
+## D-024 — Raspberry Pi software version baseline and parity milestone
+**Status:** Adopted; GitHub baseline set to v0.1.0
+The Raspberry Pi VantourerDisplayBridge software represented in this GitHub branch is now version **v0.1.0**. The root `version` file is the PackageManager version marker for the Pi software.
+
+The original Pi-side development was performed through manual changes without consistent versioning. Do not assign the ESP32 firmware version to the Pi implementation. The historical `pi-snapshot/version` marker is retained as snapshot evidence and is not the current root package version.
+
+Every subsequent Pi-side development step increments the patch version in sequence: **v0.1.1, v0.1.2, v0.1.3**, etc. The **v0.2.0** version is reserved for the explicit milestone at which the GitHub Pi implementation has reached functional parity with the manually developed Pi reference implementation. Do not declare v0.2.0 until that parity has been checked and confirmed.
+
+ESP32 firmware versioning remains completely independent; ESP32 v0.3.6 does not identify a Pi software or PackageManager release. See [CHANGELOG.md](../CHANGELOG.md) and [PROJECT_STATUS.md](PROJECT_STATUS.md).
