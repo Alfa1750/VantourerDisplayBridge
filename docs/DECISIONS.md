@@ -99,3 +99,13 @@ VantourerDisplayBridge has been bidirectional from the beginning: the Pi sends t
 The user reports that the manually developed version stored in the SD-card backup already implements sending and receiving. That backup is the functional reference. Recover and preserve its implementation, then bring the SetupHelper/PackageManager version into functional parity. Do not reconstruct the command path from memory, redesign it unnecessarily, or describe bidirectional operation as new scope.
 
 Specific controls being inventoried include MPPT enable/disable and Orion XS enable/disable plus adjustable configured charging-current limit. Actual state/setpoint feedback must be represented separately from a requested command. Exact command encoding and response behavior must be captured from the manual backup before changes are made. Node-RED safety and JK-BMS charging-protection logic remain authoritative.
+
+## D-023 — BLE notification MTU truncation fixed in ESP32 firmware v0.3.6
+**Status:** Reported tested successfully on the manual implementation
+The initial Pi-to-ESP32 notification test was limited to 20 bytes (`Hallo vanaf Raspberr`), consistent with the default ATT MTU of 23. This was fixed in ESP32 `ble_bridge.c` by explicitly starting MTU exchange on connection with `ble_gattc_exchange_mtu(s_conn_handle, on_mtu_exchange, NULL)`. The `on_mtu_exchange(...)` callback logs the result and starts `discover_service()` only after MTU exchange; service discovery was moved to that callback path. After flashing, the ESP32 received the complete message `Hallo vanaf de Raspberry Pi`. The user identified this working firmware as **ESP32 v0.3.6**.
+
+The reverse text direction had also been tested: the Pi received/logged `Hallo vanaf ESP32` after the ESP32 enabled notifications. Together, these tests establish that the manual implementation had working bidirectional BLE text transport and that the 20-byte truncation was resolved. The exact negotiated MTU value is not recorded and must not be guessed.
+
+This does **not** prove that actual Victron commands were forwarded to Node-RED or that MPPT/Orion controls were tested. It also does not mean the future binary display-frame format or its fragmentation is implemented. See [BLE_DISPLAY_PROTOCOL.md](BLE_DISPLAY_PROTOCOL.md) for the detailed test history and the distinction between the proven v0.3.6 text transport and the future binary protocol design.
+
+**Do not repeat the 20-byte truncation investigation or reimplement this fix without first inspecting the v0.3.6 reference code. Preserve this working implementation when bringing the SetupHelper/PackageManager package to parity.**
