@@ -85,3 +85,10 @@ ESP32 firmware versions, display-bridge package versions and future JK-BMS monit
 ## D-020 — Test helpers are not production behavior
 **Status:** Required  
 Fake telemetry, fixed greeting messages, TCP echo and manual test clients must be classified as test-only and not shipped as active production behavior.
+## D-021 — Compact binary BLE display frames and MTU target
+**Status:** Design agreed; implementation and live negotiation not yet verified
+The Pi ↔ ESP32 display data path will use a versioned, fixed-layout binary frame rather than textual numeric values or JSON. Numeric measurements should use documented scaled integers where appropriate (for example 12.85 V as 1285 with scale ×100). Every field must define its device/source, measurement, width, signedness, scale, unit, byte order and validity representation. The packet must include protocol/version and sequence information and distinguish valid zero values from unavailable or stale data.
+
+The design target is an ATT MTU of 247 bytes, allowing up to 244 bytes of notification value (ATT_MTU - 3). This is a target, not a claim that the value has already been negotiated. Both Pi and ESP32 must support/request it, and the effective MTU must be checked after connection. The application sends one logical display frame; if it exceeds the available notification payload, it must be fragmented with reassembly metadata rather than truncated.
+
+See [BLE_DISPLAY_PROTOCOL.md](BLE_DISPLAY_PROTOCOL.md) for the protocol design. Exact field offsets, types, scales, status layout and fragmentation format remain to be finalized before implementation.
