@@ -25,7 +25,7 @@ See [Architecture](docs/ARCHITECTURE.md), [Project status](docs/PROJECT_STATUS.m
 2. Do not change the working reference Pi until a verified backup/snapshot exists.
 3. Record every confirmed implementation, system change, test, and rollback point here.
 4. Do not invent missing source files, settings, dependencies, or installation steps. Mark them as unknown until inspected.
-5. Keep ESP32 firmware versioning separate from the Python bridge and SetupHelper.
+5. Keep ESP32 firmware versioning separate from the Raspberry Pi software and PackageManager. The Pi baseline is v0.1.0; use v0.1.x for incremental development and reserve v0.2.0 for verified parity with the manually developed Pi reference.
 6. A change is not complete until it is tested on the reference system and documented.
 7. The project is only installation-complete after a clean-Pi SetupHelper installation, reboot test, and bidirectional end-to-end test.
 
