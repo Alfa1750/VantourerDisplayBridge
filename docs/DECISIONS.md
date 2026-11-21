@@ -92,3 +92,10 @@ The Pi ↔ ESP32 display data path will use a versioned, fixed-layout binary fra
 The design target is an ATT MTU of 247 bytes, allowing up to 244 bytes of notification value (ATT_MTU - 3). This is a target, not a claim that the value has already been negotiated. Both Pi and ESP32 must support/request it, and the effective MTU must be checked after connection. The application sends one logical display frame; if it exceeds the available notification payload, it must be fragmented with reassembly metadata rather than truncated.
 
 See [BLE_DISPLAY_PROTOCOL.md](BLE_DISPLAY_PROTOCOL.md) for the protocol design. Exact field offsets, types, scales, status layout and fragmentation format remain to be finalized before implementation.
+## D-022 — Bidirectional ESP32 display control is a foundational requirement
+**Status:** Core requirement; manual implementation reported working, package parity pending recovery from backup
+VantourerDisplayBridge has been bidirectional from the beginning: the Pi sends telemetry to the ESP32 using GATT notifications, and the ESP32 sends commands to the Pi using GATT writes. The ESP32 must be able to operate supported devices through the Pi and Node-RED, not merely display telemetry. This is a core purpose of the bridge, not a newly introduced feature.
+
+The user reports that the manually developed version stored in the SD-card backup already implements sending and receiving. That backup is the functional reference. Recover and preserve its implementation, then bring the SetupHelper/PackageManager version into functional parity. Do not reconstruct the command path from memory, redesign it unnecessarily, or describe bidirectional operation as new scope.
+
+Specific controls being inventoried include MPPT enable/disable and Orion XS enable/disable plus adjustable configured charging-current limit. Actual state/setpoint feedback must be represented separately from a requested command. Exact command encoding and response behavior must be captured from the manual backup before changes are made. Node-RED safety and JK-BMS charging-protection logic remain authoritative.
