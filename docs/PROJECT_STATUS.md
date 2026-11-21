@@ -161,11 +161,13 @@ Still to identify: the actual BlueZ daemon executable/package/version and how it
 
 ## Versions and naming
 
-- ESP32 project: `VictronDisplay7`, version `v0.3.6` (VS Code project only).
-- Python bridge version marker: `v0.1d`.
-- Node-RED test flow: no version recorded.
-- SetupHelper package: no release recorded.
-- Repository: newly created; initial documentation baseline only.
+- **Raspberry Pi VantourerDisplayBridge software in this GitHub branch: v0.1.0.** This is the first consistently versioned GitHub baseline for the Pi-side software.
+- The root `version` file is the PackageManager version marker and now contains `v0.1.0`.
+- Pi-side changes before this baseline were made manually without consistent versioning. The original manually developed Pi implementation is a separate functional reference; it was not ESP32 v0.3.6.
+- The `pi-snapshot/version` file preserves the historical `v0.1d` marker captured from the reference Pi. It is retained as snapshot evidence and is not the current root PackageManager version.
+- Pi development after v0.1.0 increments through v0.1.1, v0.1.2, v0.1.3, etc. Reserve **v0.2.0** for the milestone when the GitHub Pi implementation has reached functional parity with the manually developed Pi reference.
+- ESP32 project: `VictronDisplay7`, firmware version `v0.3.6`; this is an independent version namespace.
+- Node-RED test flow: no version recorded. Future Node-RED flow and JK-BMS monitor versioning remain separate.
 
 Naming discrepancy:
 - Project and service use `VantourerDisplayBridge`.
