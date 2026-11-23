@@ -144,7 +144,9 @@ A version number therefore identifies a development step; a Git commit identifie
 
 When comparing the manually developed Raspberry Pi implementation with GitHub v0.1.0 and preparing GitHub v0.1.1, use **only the software files that are confirmed to be active in the running Pi installation**. Determine active files from the actual running service configuration/processes and their referenced paths.
 
-Explicitly exclude all backup and inactive material from the investigation and comparison. This includes (but is not limited to) files or directories named or functioning as backups, copies, snapshots, archives, old versions, historical versions, restore points, and cached/compiled artifacts. Do not open, inspect, compare, or use such files as evidence or as a source for implementation. Their presence in the project directory does not make them part of the active software. Do not ask the user to provide or inspect them.
+Explicitly exclude backup and inactive material from the **technical implementation comparison**. This includes (but is not limited to) files or directories named or functioning as backups, copies, snapshots, archives, old versions, historical versions, and cached/compiled artifacts. Do not inspect or use them as evidence for what code is currently active, or as a source for implementation. Their presence in the project directory does not make them part of the active software.
+
+**Recovery is a separate matter:** a verified backup is a valid and important rollback/recovery option. It may be restored if a test or reinstall damages the test system. The restriction above does not prohibit using a backup for recovery, and it does not mean the current Pi is the only recoverable working system.
 
 For this project comparison, the two authoritative sources are:
 1. The confirmed active software currently running on the reference Pi.
