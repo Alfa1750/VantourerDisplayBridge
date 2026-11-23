@@ -332,3 +332,41 @@ Verified facts from the user's terminal output:
 - An earlier process check found no running `gatt_server.py` process. Do not infer that the BLE server is currently running from the presence of old test messages in the log.
 
 The active and persistent service scripts were not changed by this operation; only their respective `log/run` files were changed. The project snapshot in GitHub already contains the new log path. The reference Pi remains a development system; this operation does not establish clean-install or reboot acceptance.
+
+
+---
+
+## Development update — Node-RED/TCP and BLE test progress (Nov 23, 2026)
+
+This dated update records later test progress and must be read alongside the earlier phase plan above. It does not retroactively change the earlier acceptance criteria for a clean SetupHelper installation.
+
+### Node-RED → Pi → ESP32 test path — verified
+
+- The Pi TCP listener and Node-RED TCP client test use port `5005`.
+- The Node-RED flow sends newline-delimited JSON. The JSON object is stringified before the newline delimiter is appended.
+- The flow stores the current TCP client connection identifier from the TCP node's `connected` event. This connection-specific identifier is used as `msg.topic` for writes back to that client; it is not a fixed IP address.
+- A test payload containing a counter, voltage, current, and SOC was sent from Node-RED through the Pi TCP bridge and BLE notifications to the ESP32.
+- The ESP32 received the payload and its counter incremented. The user confirmed the test worked without recurring Node-RED debug errors.
+- This test flow correction is recorded as Node-RED flow version `v0.1.3`. Node-RED flow versioning remains independent of the Pi package version and ESP32 firmware version.
+
+### ESP32 → Pi → Node-RED return path — partially verified
+
+- The Pi log has shown the ESP32 BLE write being received by the Pi.
+- The Pi log also showed the payload being forwarded toward the Node-RED TCP connection (17 bytes in the observed test).
+- This proves the BLE write reached the Pi and the Pi attempted/recorded forwarding over TCP.
+- It does **not yet prove** that the message appeared in a Node-RED Debug node. That final observation remains an open test.
+
+### Remaining work from this test step
+
+1. Run a controlled ESP32-to-Node-RED test using a counter or short text message.
+2. Confirm the received message in a Node-RED Debug node and record the exact observed payload.
+3. Keep the existing BLE GATT service and characteristic UUIDs and the BlueZ/D-Bus/GLib implementation; do not replace the proven BLE foundation without a concrete reason.
+4. Continue to keep Node-RED flow exports/versioning separate from the SetupHelper package.
+5. Do not treat this communication test as proof that a clean SetupHelper installation, update, uninstall, or reboot acceptance test has passed.
+
+### Development environment and safety
+
+- The test Pi was used for the communication test; the working camper/reference Pi must not be modified unless explicitly authorized.
+- The `vesmart-server` was manually stopped for the BLE test only. It was not persistently disabled; do not assume the workaround survives a reboot.
+- Venus OS logs use UTC. The user's local time is Netherlands time.
+- On the BusyBox Venus OS environment, use `svstat /service/<name>`, `svc -d /service/<name>`, and `svc -u /service/<name>` where appropriate. The `sv` command is not available on the observed system.
