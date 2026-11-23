@@ -96,7 +96,7 @@ See [BLE_DISPLAY_PROTOCOL.md](BLE_DISPLAY_PROTOCOL.md) for the protocol design. 
 **Status:** Core requirement; manual implementation reported working, package parity pending recovery from backup
 VantourerDisplayBridge has been bidirectional from the beginning: the Pi sends telemetry to the ESP32 using GATT notifications, and the ESP32 sends commands to the Pi using GATT writes. The ESP32 must be able to operate supported devices through the Pi and Node-RED, not merely display telemetry. This is a core purpose of the bridge, not a newly introduced feature.
 
-The user reports that the manually developed version stored in the SD-card backup already implements sending and receiving. That backup is the functional reference. Recover and preserve its implementation, then bring the SetupHelper/PackageManager version into functional parity. Do not reconstruct the command path from memory, redesign it unnecessarily, or describe bidirectional operation as new scope.
+The currently running, manually developed software on the reference Pi is the technical reference. Inspect the active files actually used by its running services and establish their behavior from that live installation. Backup files, archived copies, snapshots, historical versions and other inactive files on the Pi are explicitly excluded from inspection, comparison and implementation decisions. Bring the SetupHelper/PackageManager version into functional parity with the active Pi implementation. Do not reconstruct the command path from memory, redesign it unnecessarily, or describe bidirectional operation as new scope.
 
 Specific controls being inventoried include MPPT enable/disable and Orion XS enable/disable plus adjustable configured charging-current limit. Actual state/setpoint feedback must be represented separately from a requested command. Exact command encoding and response behavior must be captured from the manual backup before changes are made. Node-RED safety and JK-BMS charging-protection logic remain authoritative.
 
@@ -138,3 +138,18 @@ Pi software versions represent distinct, meaningful development steps, not indiv
 - The ESP32 firmware version history remains independent of Pi software versioning.
 
 A version number therefore identifies a development step; a Git commit identifies an exact code state within that step; and a Git tag identifies an accepted, known-good state.
+
+## D-026 — Use only active Pi software as the implementation reference
+**Status:** Adopted; mandatory working rule
+
+When comparing the manually developed Raspberry Pi implementation with GitHub v0.1.0 and preparing GitHub v0.1.1, use **only the software files that are confirmed to be active in the running Pi installation**. Determine active files from the actual running service configuration/processes and their referenced paths.
+
+Explicitly exclude all backup and inactive material from the investigation and comparison. This includes (but is not limited to) files or directories named or functioning as backups, copies, snapshots, archives, old versions, historical versions, restore points, and cached/compiled artifacts. Do not open, inspect, compare, or use such files as evidence or as a source for implementation. Their presence in the project directory does not make them part of the active software. Do not ask the user to provide or inspect them.
+
+For this project comparison, the two authoritative sources are:
+1. The confirmed active software currently running on the reference Pi.
+2. The existing GitHub **v0.1.0** implementation.
+
+All changes to bring GitHub into parity are made under GitHub **v0.1.1**, following the established versioning and recovery-point rules. The Pi is a read-only reference and must not be modified during this capture and comparison process.
+
+This rule is persistent and applies to all subsequent investigation, code comparison, documentation and implementation work. Do not ask the user to repeat it.
