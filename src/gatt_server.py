@@ -1,109 +1,90 @@
 #!/usr/bin/env python3
-
 import dbus
 import dbus.service
 import dbus.mainloop.glib
 from gi.repository import GLib
+import os
 import signal
+from tcp_client import NodeRedTcpClient
 
-BLUEZ = 'org.bluez'
-OM = 'org.freedesktop.DBus.ObjectManager'
-PROP = 'org.freedesktop.DBus.Properties'
-GATT_MANAGER = 'org.bluez.GattManager1'
-ADV_MANAGER = 'org.bluez.LEAdvertisingManager1'
-SERVICE_IFACE = 'org.bluez.GattService1'
-CHAR_IFACE = 'org.bluez.GattCharacteristic1'
-ADV_IFACE = 'org.bluez.LEAdvertisement1'
-
-SERVICE_UUID = '8f7a0001-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
-TX_UUID = '8f7a0002-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
-RX_UUID = '8f7a0003-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
-
-mainloop = None
-
+BLUEZ='org.bluez'
+OM='org.freedesktop.DBus.ObjectManager'
+PROP='org.freedesktop.DBus.Properties'
+GATT_MANAGER='org.bluez.GattManager1'
+ADV_MANAGER='org.bluez.LEAdvertisingManager1'
+SERVICE_IFACE='org.bluez.GattService1'
+CHAR_IFACE='org.bluez.GattCharacteristic1'
+ADV_IFACE='org.bluez.LEAdvertisement1'
+SERVICE_UUID='8f7a0001-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
+TX_UUID='8f7a0002-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
+RX_UUID='8f7a0003-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
+mainloop=None
 
 class Characteristic(dbus.service.Object):
-
-    def __init__(self, bus, index, uuid, flags, service):
-        self.path = service.path + '/char' + str(index)
-        self.uuid = uuid
-        self.flags = flags
-        self.service = service
-        self.value = []
-        self.notifying = False
-        self.notify_timer_id = None
-        dbus.service.Object.__init__(self, bus, self.path)
+    def __init__(self,bus,index,uuid,flags,service):
+        self.path=service.path+'/char'+str(index)
+        self.uuid,self.flags,self.service=uuid,flags,service
+        self.value=[]
+        self.notifying=False
+        self.on_write=None
+        dbus.service.Object.__init__(self,bus,self.path)
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
 
     def get_properties(self):
-        return {
-            CHAR_IFACE: {
-                'Service': self.service.get_path(),
-                'UUID': self.uuid,
-                'Flags': dbus.Array(self.flags, signature='s'),
-                'Descriptors': dbus.Array([], signature='o')
-            }
-        }
+        return {CHAR_IFACE:{'Service':self.service.get_path(),'UUID':self.uuid,
+            'Flags':dbus.Array(self.flags,signature='s'),'Descriptors':dbus.Array([],signature='o')}}
 
-    @dbus.service.method(PROP, in_signature='s', out_signature='a{sv}')
-    def GetAll(self, interface):
-        if interface != CHAR_IFACE:
+    @dbus.service.method(PROP,in_signature='s',out_signature='a{sv}')
+    def GetAll(self,interface):
+        if interface!=CHAR_IFACE:
             raise dbus.exceptions.DBusException('Invalid interface')
         return self.get_properties()[CHAR_IFACE]
 
-    @dbus.service.method(CHAR_IFACE, in_signature='a{sv}', out_signature='ay')
-    def ReadValue(self, options):
-        return dbus.Array(self.value, signature='y')
+    @dbus.service.method(CHAR_IFACE,in_signature='a{sv}',out_signature='ay')
+    def ReadValue(self,options):
+        return dbus.Array(self.value,signature='y')
 
-    @dbus.service.method(CHAR_IFACE, in_signature='aya{sv}')
-    def WriteValue(self, value, options):
-        data = bytes(value)
-        print('ESP32 -> Pi:', data.hex(), repr(data), flush=True)
+    @dbus.service.method(CHAR_IFACE,in_signature='aya{sv}')
+    def WriteValue(self,value,options):
+        data=bytes(value)
+        print('ESP32 -> Pi:',data.hex(),repr(data),flush=True)
+        if self.on_write is not None:
+            self.on_write(data)
 
     @dbus.service.method(CHAR_IFACE)
     def StartNotify(self):
-        self.notifying = True
-        print('ESP32 heeft notifications ingeschakeld', flush=True)
-        if self.notify_timer_id is None:
-            self.notify_timer_id = GLib.timeout_add_seconds(
-                2, self.send_test_notification)
+        self.notifying=True
+        print('ESP32 heeft notifications ingeschakeld',flush=True)
 
     @dbus.service.method(CHAR_IFACE)
     def StopNotify(self):
-        self.notifying = False
-        print('ESP32 heeft notifications uitgeschakeld', flush=True)
+        self.notifying=False
+        print('ESP32 heeft notifications uitgeschakeld',flush=True)
 
-    def send_test_notification(self):
-        if not self.notifying:
-            self.notify_timer_id = None
-            return False
-        self.send(b'Hallo vanaf Raspberry Pi')
-        print('Pi -> ESP32: Hallo vanaf Raspberry Pi', flush=True)
-        return True
-
-    @dbus.service.signal(PROP, signature='sa{sv}as')
-    def PropertiesChanged(self, interface, changed, invalidated):
+    @dbus.service.signal(PROP,signature='sa{sv}as')
+    def PropertiesChanged(self,interface,changed,invalidated):
         pass
 
-    def send(self, data):
-        self.value = [dbus.Byte(b) for b in data]
-        if self.notifying:
-            self.PropertiesChanged(
-                CHAR_IFACE, {'Value': self.value}, [])
+    def send(self,data):
+        data=bytes(data)
+        self.value=[dbus.Byte(b) for b in data]
+        if not self.notifying:
+            print('Pi -> ESP32: notification niet actief; bericht overgeslagen',flush=True)
+            return
+        self.PropertiesChanged(CHAR_IFACE,{'Value':self.value},[])
+        print('Pi -> ESP32: {} bytes {}'.format(len(data),repr(data)),flush=True)
 
 class Service(dbus.service.Object):
-
-    def __init__(self, bus, index):
-        self.path = '/com/vantourer/bridge/service' + str(index)
-        self.uuid = SERVICE_UUID
-        self.characteristics = []
-        dbus.service.Object.__init__(self, bus, self.path)
-
-        self.tx = Characteristic(bus, 0, TX_UUID, ['notify'], self)
-        self.rx = Characteristic(bus, 1, RX_UUID, ['write'], self)
-        self.characteristics.extend([self.tx, self.rx])
+    def __init__(self,bus,index):
+        self.path='/com/vantourer/bridge/service'+str(index)
+        self.uuid=SERVICE_UUID
+        self.characteristics=[]
+        dbus.service.Object.__init__(self,bus,self.path)
+        self.tx=Characteristic(bus,0,TX_UUID,['notify'],self)
+        self.rx=Characteristic(bus,1,RX_UUID,['write'],self)
+        self.characteristics.extend([self.tx,self.rx])
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
@@ -112,118 +93,109 @@ class Service(dbus.service.Object):
         return self.characteristics
 
     def get_properties(self):
-        return {
-            SERVICE_IFACE: {
-                'UUID': self.uuid,
-                'Primary': dbus.Boolean(True),
-                'Characteristics': dbus.Array(
-                    [c.get_path() for c in self.characteristics],
-                    signature='o')
-            }
-        }
+        return {SERVICE_IFACE:{'UUID':self.uuid,'Primary':dbus.Boolean(True),
+            'Characteristics':dbus.Array([c.get_path() for c in self.characteristics],signature='o')}}
 
-    @dbus.service.method(PROP, in_signature='s', out_signature='a{sv}')
-    def GetAll(self, interface):
-        if interface != SERVICE_IFACE:
+    @dbus.service.method(PROP,in_signature='s',out_signature='a{sv}')
+    def GetAll(self,interface):
+        if interface!=SERVICE_IFACE:
             raise dbus.exceptions.DBusException('Invalid interface')
         return self.get_properties()[SERVICE_IFACE]
 
-
 class Application(dbus.service.Object):
-
-    def __init__(self, bus):
-        self.path = '/'
-        self.services = []
-        dbus.service.Object.__init__(self, bus, self.path)
-        self.services.append(Service(bus, 0))
+    def __init__(self,bus):
+        self.path='/'
+        self.services=[]
+        dbus.service.Object.__init__(self,bus,self.path)
+        self.services.append(Service(bus,0))
 
     def get_path(self):
         return dbus.ObjectPath(self.path)
 
-    @dbus.service.method(OM, out_signature='a{oa{sa{sv}}}')
+    @dbus.service.method(OM,out_signature='a{oa{sa{sv}}}')
     def GetManagedObjects(self):
-        result = {}
+        result={}
         for service in self.services:
-            result[service.get_path()] = service.get_properties()
+            result[service.get_path()]=service.get_properties()
             for characteristic in service.get_characteristics():
-                result[characteristic.get_path()] = (
-                    characteristic.get_properties())
+                result[characteristic.get_path()]=characteristic.get_properties()
         return result
 
-
 class Advertisement(dbus.service.Object):
+    def __init__(self,bus):
+        self.path='/com/vantourer/bridge/advertisement0'
+        dbus.service.Object.__init__(self,bus,self.path)
 
-    def __init__(self, bus):
-        self.path = '/com/vantourer/bridge/advertisement0'
-        dbus.service.Object.__init__(self, bus, self.path)
-
-    @dbus.service.method(PROP, in_signature='s', out_signature='a{sv}')
-    def GetAll(self, interface):
-        if interface != ADV_IFACE:
+    @dbus.service.method(PROP,in_signature='s',out_signature='a{sv}')
+    def GetAll(self,interface):
+        if interface!=ADV_IFACE:
             raise dbus.exceptions.DBusException('Invalid interface')
-        return {
-            'Type': 'peripheral',
-            'ServiceUUIDs': dbus.Array([SERVICE_UUID], signature='s'),
-            'LocalName': 'VantourerBridge'
-        }
+        return {'Type':'peripheral','ServiceUUIDs':dbus.Array([SERVICE_UUID],signature='s'),
+            'LocalName':'VantourerBridge'}
 
     @dbus.service.method(ADV_IFACE)
     def Release(self):
-        print('BLE-advertentie vrijgegeven', flush=True)
-
+        print('BLE-advertentie vrijgegeven',flush=True)
 
 def find_adapter(bus):
-    manager = dbus.Interface(bus.get_object(BLUEZ, '/'), OM)
-    for path, interfaces in manager.GetManagedObjects().items():
+    manager=dbus.Interface(bus.get_object(BLUEZ,'/'),OM)
+    for path,interfaces in manager.GetManagedObjects().items():
         if GATT_MANAGER in interfaces and ADV_MANAGER in interfaces:
             return path
     raise RuntimeError('Geen geschikte Bluetooth-adapter gevonden')
 
-
 def main():
     global mainloop
-
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-    bus = dbus.SystemBus()
-    adapter = find_adapter(bus)
+    bus=dbus.SystemBus()
+    adapter=find_adapter(bus)
+    print('Bluetooth-adapter:',adapter,flush=True)
+    app=Application(bus)
+    advertisement=Advertisement(bus)
+    host=os.environ.get('VDB_NODE_RED_HOST','127.0.0.1')
+    port=int(os.environ.get('VDB_NODE_RED_PORT','5005'))
+    retry=float(os.environ.get('VDB_TCP_RECONNECT_SECONDS','3'))
 
-    print('Bluetooth-adapter:', adapter, flush=True)
+    def node_red_message(data):
+        # D-Bus/GLib operations must run on the GLib main-loop thread.
+        GLib.idle_add(app.services[0].tx.send,data)
 
-    app = Application(bus)
-    advertisement = Advertisement(bus)
-
-    gatt = dbus.Interface(
-        bus.get_object(BLUEZ, adapter), GATT_MANAGER)
-    advertising = dbus.Interface(
-        bus.get_object(BLUEZ, adapter), ADV_MANAGER)
-
-    mainloop = GLib.MainLoop()
+    tcp=NodeRedTcpClient(host,port,node_red_message,reconnect_seconds=retry)
+    app.services[0].rx.on_write=tcp.send
+    gatt=dbus.Interface(bus.get_object(BLUEZ,adapter),GATT_MANAGER)
+    advertising=dbus.Interface(bus.get_object(BLUEZ,adapter),ADV_MANAGER)
+    mainloop=GLib.MainLoop()
 
     def advertising_registered():
-        print('BLE-advertising actief: VantourerBridge', flush=True)
+        print('BLE-advertising actief: VantourerBridge',flush=True)
 
     def gatt_registered():
-        print('GATT-service geregistreerd', flush=True)
-        advertising.RegisterAdvertisement(
-            advertisement.path, {},
+        print('GATT-service geregistreerd',flush=True)
+        advertising.RegisterAdvertisement(advertisement.path,{},
             reply_handler=advertising_registered,
-            error_handler=lambda e: print('Advertising-fout:', e, flush=True))
+            error_handler=lambda e:print('Advertising-fout:',e,flush=True))
 
     def registration_error(error):
-        print('GATT-registratiefout:', error, flush=True)
+        print('GATT-registratiefout:',error,flush=True)
         mainloop.quit()
 
-    gatt.RegisterApplication(
-        app.get_path(), {},
-        reply_handler=gatt_registered,
+    gatt.RegisterApplication(app.get_path(),{},reply_handler=gatt_registered,
         error_handler=registration_error)
 
-    signal.signal(signal.SIGINT, lambda s, f: mainloop.quit())
-    signal.signal(signal.SIGTERM, lambda s, f: mainloop.quit())
+    def shutdown(signum,frame):
+        print('Vantourer Display Bridge stopt...',flush=True)
+        tcp.stop()
+        mainloop.quit()
 
-    print('Vantourer Display Bridge start...', flush=True)
-    mainloop.run()
+    signal.signal(signal.SIGINT,shutdown)
+    signal.signal(signal.SIGTERM,shutdown)
+    print('Vantourer Display Bridge start...',flush=True)
+    print('Node-RED TCP-doel: {}:{}'.format(host,port),flush=True)
+    tcp.start()
+    try:
+        mainloop.run()
+    finally:
+        tcp.stop()
 
-
-if __name__ == '__main__':
+if __name__=='__main__':
     main()
