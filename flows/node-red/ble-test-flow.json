@@ -1,0 +1,233 @@
+[
+    {
+        "id": "testflow036",
+        "type": "tab",
+        "label": "BLE test",
+        "disabled": false,
+        "info": "Testflow voor VictronDisplay BLE communicatie"
+    },
+    {
+        "id": "inject036",
+        "type": "inject",
+        "z": "testflow036",
+        "name": "Elke seconde",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1",
+        "once": false,
+        "onceDelay": 0.1,
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "function036"
+            ]
+        ]
+    },
+    {
+        "id": "function036",
+        "type": "function",
+        "z": "testflow036",
+        "name": "Testdata genereren",
+        "func": "let teller = context.get(\"teller\") || 0;\nteller++;\ncontext.set(\"teller\", teller);\n\nmsg.payload = {\n    test: \"VictronDisplay\",\n    teller: teller,\n    spanning: 13.4,\n    stroom: -2.5,\n    soc: 85\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "debug036",
+        "type": "debug",
+        "z": "testflow036",
+        "name": "Testpakket bekijken",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "x": 650,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "fd82a2690b7a08d6",
+        "type": "tcp-server",
+        "z": "testflow036",
+        "action": "action",
+        "actionType": "msg",
+        "port": "5005",
+        "portType": "str",
+        "datamode": "stream",
+        "datatype": "utf8",
+        "newline": "\\n",
+        "write": "payload",
+        "writeType": "msg",
+        "keepAliveTimeout": 6000,
+        "socketTimeout": 60000,
+        "topic": "",
+        "name": "BLE TCP Server",
+        "debug": "warning",
+        "x": 460,
+        "y": 360,
+        "wires": [
+            [
+                "96a7341a8620d2bd",
+                "b9647a3fb07471ec"
+            ]
+        ]
+    },
+    {
+        "id": "2cdfb6b96c776f86",
+        "type": "inject",
+        "z": "testflow036",
+        "name": "start server once",
+        "props": [
+            {
+                "p": "action",
+                "v": "open",
+                "vt": "str"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 130,
+        "y": 240,
+        "wires": [
+            [
+                "fd82a2690b7a08d6"
+            ]
+        ]
+    },
+    {
+        "id": "26d36e4bd28ed268",
+        "type": "debug",
+        "z": "testflow036",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "a45dbcafa410d730",
+        "type": "inject",
+        "z": "testflow036",
+        "name": "",
+        "props": [
+            {
+                "p": "action",
+                "v": "write",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Hallo vanaf Node Red",
+        "payloadType": "str",
+        "x": 120,
+        "y": 560,
+        "wires": [
+            [
+                "b294ba7c7f327669"
+            ]
+        ]
+    },
+    {
+        "id": "96a7341a8620d2bd",
+        "type": "function",
+        "z": "testflow036",
+        "name": "function 1",
+        "func": "if (msg.payload === \"connected\") {\n    flow.set(\"tcpClientTopic\", msg.topic);\n    node.warn(\"TCP-client opgeslagen: \" + msg.topic);\n    return null;\n}\n\nmsg.action = \"write\";\nmsg.payload = \"Ontvangen door Node-RED\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 600,
+        "wires": [
+            [
+                "26d36e4bd28ed268",
+                "fd82a2690b7a08d6"
+            ]
+        ]
+    },
+    {
+        "id": "b9647a3fb07471ec",
+        "type": "debug",
+        "z": "testflow036",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 680,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "b294ba7c7f327669",
+        "type": "function",
+        "z": "testflow036",
+        "name": "gebruik actieve TCP-client",
+        "func": "const topic = flow.get(\"tcpClientTopic\");\n\nif (!topic) {\n    node.warn(\"Geen actieve TCP-client gevonden\");\n    return null;\n}\n\nmsg.topic = topic;\nmsg.action = \"write\";\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 360,
+        "wires": [
+            [
+                "fd82a2690b7a08d6"
+            ]
+        ]
+    },
+    {
+        "id": "4cd92aac456e767a",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-tcp-client2": "1.2.0"
+        }
+    }
+]
