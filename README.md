@@ -1,6 +1,6 @@
 # Vantourer Display Bridge
 
-Private project repository for the Raspberry Pi / Venus OS bridge used by the ESP32-S3 Victron display.
+Public project repository for the Raspberry Pi / Venus OS bridge used by the ESP32-S3 Victron display.
 
 ## Goal
 
