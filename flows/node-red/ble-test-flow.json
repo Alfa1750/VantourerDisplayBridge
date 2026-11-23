@@ -70,7 +70,7 @@
         "type": "function",
         "z": "testflow036",
         "name": "JSON voor TCP",
-        "func": "if (typeof msg.payload !== \"string\") {\\n    msg.payload = JSON.stringify(msg.payload);\\n}\\nreturn msg;",
+        "func": "if (typeof msg.payload !== \"string\") {\n    msg.payload = JSON.stringify(msg.payload);\n}\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
