@@ -159,3 +159,11 @@ For this project comparison, the two authoritative sources are:
 All changes to bring GitHub into parity are made under GitHub **v0.1.1**, following the established versioning and recovery-point rules. The Pi is a read-only reference and must not be modified during this capture and comparison process.
 
 This rule is persistent and applies to all subsequent investigation, code comparison, documentation and implementation work. Do not ask the user to repeat it.
+
+
+## D-027 — ESP32 must recover BLE discovery and connection automatically
+**Status:** Required design behavior; implementation and verification pending
+
+The ESP32 display must automatically recover when the Pi's BLE GATT server or advertising is temporarily unavailable and later becomes available again. It must resume scanning/retry discovery and reconnect to `VantourerBridge` without requiring a manual ESP32 restart or power cycle. This applies both when an established BLE connection is lost and when the Pi is unavailable during initial discovery. The implementation must handle temporary Pi/server outages and subsequent restoration robustly.
+
+The November 23, 2026 test provided the motivating observation: after `vesmart-server` was stopped on the Pi, the ESP32 did not find the now-available bridge until the ESP32 was restarted. This demonstrates the need for automatic recovery, but does not by itself establish the exact firmware-side cause. Do not treat the behavior as implemented until it has been tested without manually restarting the ESP32.
