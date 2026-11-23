@@ -41,4 +41,7 @@ jobs:
           test -x setup
           test -x services/VantourerDisplayBridge/run
           test -x services/VantourerDisplayBridge/log/run
-          ! grep -q "Hallo vanaf Raspberry Pi" src/gatt_server.py
+          grep -q "self.notify_timer_id = None" src/gatt_server.py
+          grep -q "GLib.timeout_add_seconds" src/gatt_server.py
+          grep -q "def send_test_notification" src/gatt_server.py
+          grep -q "Hallo vanaf Raspberry Pi" src/gatt_server.py
