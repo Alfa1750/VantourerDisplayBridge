@@ -1,35 +1,29 @@
 # Changelog
 
+## v0.1.2 — Node-RED TCP ↔ BLE transport (in development)
+- Add a persistent Pi TCP client connecting to the Node-RED TCP server on port 5005.
+- Forward newline-delimited UTF-8 records from Node-RED to the existing BLE TX notification characteristic.
+- Forward UTF-8 writes from ESP32 BLE RX back to Node-RED over the same TCP connection.
+- Retry automatically after Node-RED restarts or temporary connection loss.
+- Remove the periodic fixed BLE greeting; display notifications now come from Node-RED.
+- Update the manual Node-RED test flow to serialize and send its changing JSON test payload.
+- This is a transport test, not the final binary display protocol or Victron command implementation.
+
 ## v0.1.1 — Active Pi BLE behavior parity
+- Match the active Pi GATT server's two-second test-notification behavior: after ESP32 enables notifications, send Hallo vanaf Raspberry Pi every two seconds; stop the timer after notifications are disabled.
+- Keep BLE UUIDs, advertisement name, and GATT behavior unchanged.
+- No Node-RED/TCP integration is included in v0.1.1.
 
-- Match the active Raspberry Pi GATT server's two-second test-notification behavior: after the ESP32 enables notifications, send `Hallo vanaf Raspberry Pi` every two seconds; stop the timer callback after notifications are disabled.
-- Keep the existing BLE service UUIDs, characteristic UUIDs, advertisement name, and GATT behavior unchanged.
-- This step does not add or claim Node-RED/TCP integration. The TCP test flow remains separate from the active Pi GATT server.
-- This is an in-progress parity step, not the v0.2.0 functional-parity milestone.
-
-This changelog tracks the **Raspberry Pi VantourerDisplayBridge software** in this repository. It does not track ESP32 firmware versions.
+This changelog tracks Raspberry Pi VantourerDisplayBridge software, not ESP32 firmware.
 
 ## v0.1.0 — GitHub Pi software baseline
+- Establish the first consistently versioned Raspberry Pi-side baseline.
+- v0.1.x is the incremental development series; v0.2.0 is reserved for verified functional parity with the manually developed reference implementation.
 
-- Establish the current Raspberry Pi-side software state represented in this GitHub branch as the first consistently versioned baseline.
-- This is a repository/Pi-software baseline, not a claim that the SetupHelper package has reached functional parity with the manually developed Pi implementation.
-- Subsequent Pi-side development increments the patch version: v0.1.1, v0.1.2, v0.1.3, and so on.
-- When the GitHub Pi implementation has reached functional parity with the manually developed reference implementation, mark that milestone as v0.2.0.
-
-## Versioning rules
-
-- The root version file is the PackageManager version marker for the Raspberry Pi software.
-- Pi software development before this baseline was performed through manual changes without a consistent versioning scheme. Do not retroactively assign those changes ESP32 version numbers.
-- v0.1.x is the development series leading toward functional parity with the manual Pi implementation.
-- v0.2.0 is reserved for the verified functional-parity milestone.
-- ESP32 firmware has its own independent version numbering. ESP32 firmware v0.3.6 is unrelated to Pi software v0.1.0.
-- Node-RED flows and future JK-BMS monitor software have their own independent version histories.
-
-## Development and recovery-point rules
-
-- A new distinct Pi development step receives its version number when that step begins.
-- Keep that version number unchanged during all edits, debugging and repeated tests within the same step. Do not create a new version for every test or code correction.
-- Record meaningful intermediate changes with Git commits.
-- When a step is successfully tested and accepted, create a Git tag for that version. The tag is a known-good recovery point.
-- Increment to the next patch version only when beginning the next distinct development step.
-- The PackageManager branch may contain the current in-development, not-yet-tested version so it can be installed through GUI v1 and tested on the separate test Pi. Do not wait for acceptance before making a development step installable. Create a Git tag only after the user confirms successful testing and acceptance; the tag marks a known-good recovery point.
+## Versioning and recovery
+- The root version file is the PackageManager version marker.
+- Keep a version number unchanged through coding, debugging, and tests for one development step.
+- Record meaningful intermediate states as Git commits.
+- Create a Git tag only after the user confirms successful testing and acceptance.
+- The in-development branch may expose the current version through GUI v1 PackageManager for testing.
+- ESP32 firmware and Node-RED flows have independent version histories.
