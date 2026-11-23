@@ -48,3 +48,15 @@ When a test is repeated, record:
 - Relevant unedited log output.
 - Expected and actual result.
 - Whether it is a development-only test or production acceptance test.
+
+
+## v0.1.2 implementation checks
+
+| ID | Area | Test | Result | Evidence status |
+|---|---|---|---|---|
+| T-008 | TCP client | Persistent Pi TCP client connects to Node-RED server on 127.0.0.1:5005 | Implemented; not yet run on Venus OS | Pending user test |
+| T-009 | Node-RED → BLE | Newline-delimited JSON record is forwarded to BLE TX notification | Implemented; end-to-end test pending | Pending user test |
+| T-010 | BLE → Node-RED | ESP32 RX write is forwarded as a newline-delimited TCP record | Implemented; end-to-end test pending | Pending user test |
+| T-011 | TCP recovery | Client retries after Node-RED TCP server is unavailable/restarted | Implemented; automated test pending | Pending validation |
+
+v0.1.2 remains an in-development step. No Git tag is created until the user confirms successful testing and acceptance.
