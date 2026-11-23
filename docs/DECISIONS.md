@@ -134,7 +134,7 @@ Pi software versions represent distinct, meaningful development steps, not indiv
 - When a step has been tested successfully and is accepted as a working state, create a Git tag for that version. This tag is a known-good recovery point.
 - Only when beginning the next distinct development step, increment the patch version (for example v0.1.2, then v0.1.3). If a step does not work, continue correcting and testing under its existing version number.
 - Preserve all known-good tags so development can return to the most recent working intermediate step. Do not move or overwrite an existing version tag.
-- The PackageManager installation branch must expose only approved, tested versions. Development commits and unfinished work must remain on a separate development branch until accepted and deliberately promoted to the installation branch. Confirm the branch configuration used by SetupHelper before relying on this separation.
+- The PackageManager branch may and must expose the current in-development version so it can be installed and tested through the normal GUI workflow. A version does **not** need to be tested or accepted before it is available for installation. Use commits to preserve intermediate states and keep the version number unchanged throughout one development step. A Git tag is created only after the user confirms that step is tested and accepted; tags identify known-good recovery points, not prerequisites for installation.
 - The ESP32 firmware version history remains independent of Pi software versioning.
 
 A version number therefore identifies a development step; a Git commit identifies an exact code state within that step; and a Git tag identifies an accepted, known-good state.
