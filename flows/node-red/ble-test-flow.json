@@ -191,7 +191,7 @@
         "id": "96a7341a8620d2bd",
         "type": "function",
         "z": "testflow036",
-        "name": "function 1",
+        "name": "TCP-clientadres onthouden",
         "func": "if (msg.payload === \"connected\") {\n    flow.set(\"tcpClientTopic\", msg.topic);\n    node.warn(\"TCP-client opgeslagen: \" + msg.topic);\n    return null;\n}\n\nmsg.action = \"write\";\nif (typeof msg.payload !== \"string\") {\n    msg.payload = JSON.stringify(msg.payload);\n}\nif (!msg.payload.endsWith(\"\\n\")) {\n    msg.payload += \"\\n\";\n}\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
