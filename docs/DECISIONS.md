@@ -144,9 +144,13 @@ A version number therefore identifies a development step; a Git commit identifie
 
 When comparing the manually developed Raspberry Pi implementation with GitHub v0.1.0 and preparing GitHub v0.1.1, use **only the software files that are confirmed to be active in the running Pi installation**. Determine active files from the actual running service configuration/processes and their referenced paths.
 
-Explicitly exclude backup and inactive material from the **technical implementation comparison**. This includes (but is not limited to) files or directories named or functioning as backups, copies, snapshots, archives, old versions, historical versions, and cached/compiled artifacts. Do not inspect or use them as evidence for what code is currently active, or as a source for implementation. Their presence in the project directory does not make them part of the active software.
+Only **two specific files** in the Raspberry Pi project directory are excluded from technical inspection and comparison:
+1. `/data/VantourerDisplayBridge/src/gatt_server_backup.py`
+2. `/data/VantourerDisplayBridge/src/gatt_server_v0.3.6.py`
 
-**Recovery is a separate matter:** a verified backup is a valid and important rollback/recovery option. It may be restored if a test or reinstall damages the test system. The restriction above does not prohibit using a backup for recovery, and it does not mean the current Pi is the only recoverable working system.
+Do not open, inspect, compare, or use those two files as implementation references. No other Pi files or backups are excluded by this rule. In particular, Paragon full-SD backups/images of the Raspberry Pi are allowed and should be used as recovery points; they may be restored when needed to recover a test system. Do not confuse those Paragon recovery backups with the two excluded files above.
+
+The active implementation reference remains the software files confirmed to be used by running services/processes.
 
 For this project comparison, the two authoritative sources are:
 1. The confirmed active software currently running on the reference Pi.
