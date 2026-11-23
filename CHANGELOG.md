@@ -32,4 +32,4 @@ This changelog tracks the **Raspberry Pi VantourerDisplayBridge software** in th
 - Record meaningful intermediate changes with Git commits.
 - When a step is successfully tested and accepted, create a Git tag for that version. The tag is a known-good recovery point.
 - Increment to the next patch version only when beginning the next distinct development step.
-- Keep unfinished development off the PackageManager installation branch. Only promote approved, tested versions to the branch PackageManager reads; verify the actual SetupHelper branch configuration before using this workflow.
+- The PackageManager branch may contain the current in-development, not-yet-tested version so it can be installed through GUI v1 and tested on the separate test Pi. Do not wait for acceptance before making a development step installable. Create a Git tag only after the user confirms successful testing and acceptance; the tag marks a known-good recovery point.
