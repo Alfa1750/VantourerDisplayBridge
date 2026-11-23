@@ -14,25 +14,24 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v5
-
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-
       - name: Check shell syntax
         run: |
           bash -n setup
           sh -n services/VantourerDisplayBridge/run
           sh -n services/VantourerDisplayBridge/log/run
           bash -n tests/setuphelper-harness.sh
-
       - name: Test SetupHelper control flow with mocked framework
         run: bash tests/setuphelper-harness.sh
-
       - name: Check Python syntax
-        run: python -m py_compile src/gatt_server.py
-
+        run: python -m py_compile src/gatt_server.py src/tcp_client.py
+      - name: Test TCP client
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Check Node-RED flow JSON
+        run: python -m json.tool flows/node-red/ble-test-flow.json > /dev/null
       - name: Check package layout and executable permissions
         run: |
           test -f version
@@ -41,7 +40,5 @@ jobs:
           test -x setup
           test -x services/VantourerDisplayBridge/run
           test -x services/VantourerDisplayBridge/log/run
-          grep -q "self.notify_timer_id = None" src/gatt_server.py
-          grep -q "GLib.timeout_add_seconds" src/gatt_server.py
-          grep -q "def send_test_notification" src/gatt_server.py
-          grep -q "Hallo vanaf Raspberry Pi" src/gatt_server.py
+          grep -q "NodeRedTcpClient" src/gatt_server.py
+          ! grep -q "def send_test_notification" src/gatt_server.py
