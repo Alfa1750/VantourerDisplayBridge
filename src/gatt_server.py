@@ -31,6 +31,7 @@ class Characteristic(dbus.service.Object):
         self.service = service
         self.value = []
         self.notifying = False
+        self.notify_timer_id = None
         dbus.service.Object.__init__(self, bus, self.path)
 
     def get_path(self):
@@ -65,11 +66,22 @@ class Characteristic(dbus.service.Object):
     def StartNotify(self):
         self.notifying = True
         print('ESP32 heeft notifications ingeschakeld', flush=True)
+        if self.notify_timer_id is None:
+            self.notify_timer_id = GLib.timeout_add_seconds(
+                2, self.send_test_notification)
 
     @dbus.service.method(CHAR_IFACE)
     def StopNotify(self):
         self.notifying = False
         print('ESP32 heeft notifications uitgeschakeld', flush=True)
+
+    def send_test_notification(self):
+        if not self.notifying:
+            self.notify_timer_id = None
+            return False
+        self.send(b'Hallo vanaf Raspberry Pi')
+        print('Pi -> ESP32: Hallo vanaf Raspberry Pi', flush=True)
+        return True
 
     @dbus.service.signal(PROP, signature='sa{sv}as')
     def PropertiesChanged(self, interface, changed, invalidated):
