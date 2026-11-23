@@ -14,7 +14,7 @@ Venus OS / Victron devices
         v
 Node-RED Victron nodes and flow logic
         |
-        | TCP (target integration; not yet implemented)
+        | TCP (Node-RED server :5005; persistent Pi client)
         v
 Python bridge on Raspberry Pi
         |
@@ -66,8 +66,9 @@ Do not infer that a battery is absent merely because its BLE connection drops. A
 
 ## Transport decisions
 
-- The intended Node-RED ↔ display-bridge transport is TCP.
-- The display bridge's TCP application integration is not yet implemented/verified.
+- Node-RED hosts the TCP server on port 5005; the Python display bridge maintains a reconnecting TCP client to 127.0.0.1:5005 by default.
+- TCP records are newline-delimited UTF-8 text. The Pi forwards Node-RED records to BLE TX notifications and ESP32 BLE RX writes back to Node-RED.
+- The v0.1.2 test integration does not yet implement the final binary display frame, BLE fragmentation, command schemas, or Victron device-control logic.
 - The future JK-BMS monitor will independently connect to both JK-BMS devices over BLE and send telemetry to Node-RED over TCP.
 - The JK-BMS monitor is telemetry-only: it does not decide whether charging is allowed and does not control Victron equipment.
 - MQTT is not required for the initial design. A later Wi-Fi/MQTT transport for the ESP32 display may be considered separately; it must not become a dependency of JK-BMS monitoring or charging protection.
