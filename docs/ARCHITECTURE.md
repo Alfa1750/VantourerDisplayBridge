@@ -91,3 +91,7 @@ The JK-BMS devices retain responsibility for their own cell protection. The exte
 The JK-BMS monitor → Node-RED TCP protocol must define message framing (for example, one JSON object per newline-delimited record), reconnection behavior, per-BMS connection status, timestamps/sequence numbers and stale-data handling. These details must be documented and tested before implementation is considered complete.
 
 The display bridge and JK-BMS monitor must each reconnect independently if Node-RED restarts. Failure of the ESP32 or display BLE link must not affect JK-BMS monitoring or charging-protection decisions.
+
+## BLE recovery and reconnection requirement
+
+The ESP32 display must recover automatically when the Raspberry Pi BLE GATT server or its advertising becomes temporarily unavailable and later returns. After a lost connection or failed discovery, the ESP32 must resume scanning/retry discovery with an appropriate retry strategy and reconnect when `VantourerBridge` becomes available again. Recovery must not require a manual ESP32 reboot or power cycle. The implementation must handle both an established connection being lost and the Pi becoming unavailable before a connection is established. This is a design requirement; automatic recovery behavior is not yet implemented or verified.
