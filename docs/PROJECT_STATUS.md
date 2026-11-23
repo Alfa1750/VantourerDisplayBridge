@@ -13,7 +13,7 @@ A clean Raspberry Pi running Venus OS must be installable through SetupHelper. P
 ## Confirmed repository/account facts
 
 - GitHub repository: `Alfa1750/VantourerDisplayBridge`
-- Visibility: private.
+- Visibility: public.
 - Default branch: `main`.
 - ChatGPT Codex Connector has been installed and granted access to this selected repository.
 - Repository was empty when first inspected.
@@ -241,7 +241,7 @@ No Raspberry Pi files, services, settings, or processes were changed. No Node-RE
 
 ## Safety
 
-The current reference Pi is valuable and must remain untouched until a verified backup is made. Do not delete, rename, overwrite, stop, disable, install, or reconfigure anything on it as part of this repository setup.
+The reference Pi is valuable and must remain untouched during implementation comparison. A Paragon full-SD backup exists and is an approved recovery path; use it to restore the Pi/test system if required. The two specifically excluded files are only `src/gatt_server_backup.py` and `src/gatt_server_v0.3.6.py`; Paragon backups are not excluded.
 
 
 ### Python source comparison (inspected Nov 20, 2026)
