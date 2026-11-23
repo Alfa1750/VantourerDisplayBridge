@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.1.1 — Active Pi BLE behavior parity
+
+- Match the active Raspberry Pi GATT server's two-second test-notification behavior: after the ESP32 enables notifications, send `Hallo vanaf Raspberry Pi` every two seconds; stop the timer callback after notifications are disabled.
+- Keep the existing BLE service UUIDs, characteristic UUIDs, advertisement name, and GATT behavior unchanged.
+- This step does not add or claim Node-RED/TCP integration. The TCP test flow remains separate from the active Pi GATT server.
+- This is an in-progress parity step, not the v0.2.0 functional-parity milestone.
+
 This changelog tracks the **Raspberry Pi VantourerDisplayBridge software** in this repository. It does not track ESP32 firmware versions.
 
 ## v0.1.0 — GitHub Pi software baseline
