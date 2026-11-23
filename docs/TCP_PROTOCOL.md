@@ -1,4 +1,4 @@
-# Node-RED ↔ Raspberry Pi TCP protocol (v0.1.2)
+# Node-RED ↔ Raspberry Pi TCP protocol (v0.1.3)
 
 ## Connection roles
 - Node-RED hosts the TCP server on port 5005.
@@ -12,7 +12,7 @@ This step uses UTF-8 text records separated by newline. TCP packet boundaries ar
 
 The Pi does not parse payloads. A Node-RED record is forwarded unchanged as one BLE TX notification. An ESP32 RX write is forwarded as one newline-terminated TCP record.
 
-The test flow serializes its JavaScript object with JSON.stringify(msg.payload). This is a transport test, not the final binary display-frame protocol.
+The test flow serializes its JavaScript object with JSON.stringify(msg.payload) and appends exactly one newline before writing to the TCP server. This is a transport test, not the final binary display-frame protocol.
 
 Current boundaries:
 - UTF-8 text only.
@@ -34,7 +34,7 @@ Current boundaries:
 3. Node-RED receives it and can reply to the same client using msg.topic.
 
 ## Test flow
-Import flows/node-red/ble-test-flow.json manually. It opens the TCP server on port 5005 and sends changing JSON test data once per second to the active TCP client. It retains a manual text inject and the Node-RED echo response. PackageManager installs Pi software only; it does not import Node-RED flows.
+Import flows/node-red/ble-test-flow.json manually. It opens the TCP server on port 5005 and sends changing JSON test data once per second to the active TCP client. The shared write function appends the required newline to periodic test data and manual text; the echo path does the same. This prevents the Pi's newline-framed TCP receiver from accumulating data until its maximum record size is exceeded. It retains a manual text inject and the Node-RED echo response. PackageManager installs Pi software only; it does not import Node-RED flows.
 
 ## Reliability
 - TCP reconnect is automatic.
