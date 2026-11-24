@@ -1,6 +1,6 @@
 import unittest
 
-from ble_framing import (
+from src.ble_framing import (
     FRAME_DATA_SIZE,
     FRAME_HEADER_SIZE,
     MAX_MESSAGE_SIZE,
