@@ -15,7 +15,7 @@
 - Add an importable Node-RED tab containing the normalization Function, a Debug node, and wiring instructions. It reuses the existing MQTT input, active TCP-client routing Function, and TCP server; no broker credentials or duplicate server are included.
 - Add a shared Pi BLE framing helper. Each notification is at most 20 bytes and carries the `VD` versioned fragment header, so the sender works at the minimum ATT MTU of 23.
 - Queue fragments at 10 ms intervals; reject empty or oversized logical messages instead of truncating them.
-- Add source-level tests for the framing helper and Node-RED normalization Function. Synthetic JavaScript fixtures were exercised in the ChatGPT JavaScript runtime. GitHub Actions run `45443182121` passed Python syntax, TCP client tests, Node-RED Function tests, flow JSON validation, and package-layout checks. The live Node-RED runtime and Pi BLE link have not been tested.
+- Add source-level tests for the framing helper and Node-RED normalization Function. Synthetic JavaScript fixtures were exercised in the ChatGPT JavaScript runtime. GitHub Actions run `45443182121` passed Python syntax, TCP client tests, Node-RED Function tests, flow JSON validation, and package-layout checks. A subsequent live test on 2026-11-24 confirmed battery telemetry on the ESP32 with Pi v0.1.4; see `docs/NODERED_LIVE_TEST_FLOW.md`.
 - Raspberry Pi package version marker: v0.1.4. This is independent of ESP32 firmware v0.3.9.
 - The user installed v0.1.4 on the reference Pi and confirmed live battery telemetry on ESP32 firmware v0.3.9. Clean-install and SetupHelper lifecycle acceptance remain pending.
 
