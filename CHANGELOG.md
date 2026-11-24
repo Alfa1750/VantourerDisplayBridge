@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.1.4 — v0.3.9 battery telemetry transport and Node-RED nodes (development)
+- Add a Node-RED Function that maps SmartShunt instances 293 and 294 plus starter battery voltage to the compact JSON contract expected by ESP32 firmware v0.3.9.
+- Add an importable Node-RED tab containing the normalization Function, a Debug node, and wiring instructions. It reuses the existing MQTT input, active TCP-client routing Function, and TCP server; no broker credentials or duplicate server are included.
+- Add a shared Pi BLE framing helper. Each notification is at most 20 bytes and carries the `VD` versioned fragment header, so the sender works at the minimum ATT MTU of 23.
+- Queue fragments at 10 ms intervals; reject empty or oversized logical messages instead of truncating them.
+- Add source-level tests for the framing helper and Node-RED normalization Function. Synthetic JavaScript fixtures were exercised in the ChatGPT JavaScript runtime; the live Node-RED runtime and Pi BLE link have not been tested.
+- Raspberry Pi package version marker: v0.1.4. This is independent of ESP32 firmware v0.3.9.
+- Build/install/deployment on the Raspberry Pi: not performed. Hardware BLE validation: pending.
+
+
 ## Development note — Venus OS MQTT battery input investigation (2026-11-24; not a package version)
 - Confirmed the test Pi and camper Pi both run Venus OS 3.85 and are on the same LAN. The camper Pi broker at 192.168.1.113 was successfully paired; MQTT over TLS port 8883 reached Connected in Node-RED. Pairing secrets are intentionally not recorded.
 - Confirmed the MQTT broker is a reusable broker configuration, not a wired flow node. MQTT Input nodes select that broker configuration.
