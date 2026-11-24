@@ -9,10 +9,10 @@ The future JK-BMS monitor will be developed in a separate, independent GitHub re
 ## Display data path
 
 ```text
-Venus OS / Victron devices
+Venus OS MQTT battery overview (system/0/Batteries)
         |
         v
-Node-RED Victron nodes and flow logic
+Node-RED MQTT Input + normalization Function
         |
         | TCP (Node-RED server :5005; persistent Pi client)
         v
@@ -22,6 +22,10 @@ Python bridge on Raspberry Pi
         v
 ESP32-S3 Waveshare 7B display
 ```
+
+For the current remote test, the test Pi subscribes to the camper Pi's Venus OS MQTT broker over the LAN using a paired MQTT token and TLS. In the final camper deployment, Node-RED is intended to use the local Venus OS MQTT broker. The same MQTT Input and normalization Function are intended to remain; only the broker selection/connection configuration changes. See `docs/NODERED_MQTT_TEST_STATUS.md` for the observed broker settings, battery inventory and current development state.
+
+The display-data MQTT normalization is based on the `system/0/Batteries` inventory. It selects SmartShunt 1 (instance 293), SmartShunt 2 (instance 294), and the starter battery voltage. The temporary USB-connected JK BMS entry is excluded; both JK BMS devices will be read separately by the independent Raspberry Pi BLE JK-BMS monitor.
 
 ## Roles
 
@@ -40,8 +44,8 @@ ESP32-S3 Waveshare 7B display
 - Must not be required for JK-BMS monitoring or charging-protection decisions.
 
 ### Node-RED
-- Uses Victron nodes to collect values from Venus OS.
-- Receives JK-BMS telemetry from the separate JK-BMS monitor.
+- Uses MQTT Input to receive Venus OS battery inventory and a Function node to normalize the two SmartShunts and starter battery voltage.
+- Receives JK-BMS telemetry from the separate Raspberry Pi BLE JK-BMS monitor.
 - Owns battery selection, charging-protection logic and Victron charger control.
 - Node-RED flows are imported manually; they are not installed by PackageManager.
 
@@ -71,7 +75,7 @@ Do not infer that a battery is absent merely because its BLE connection drops. A
 - The v0.1.2 test integration does not yet implement the final binary display frame, BLE fragmentation, command schemas, or Victron device-control logic.
 - The future JK-BMS monitor will independently connect to both JK-BMS devices over BLE and send telemetry to Node-RED over TCP.
 - The JK-BMS monitor is telemetry-only: it does not decide whether charging is allowed and does not control Victron equipment.
-- MQTT is not required for the initial design. A later Wi-Fi/MQTT transport for the ESP32 display may be considered separately; it must not become a dependency of JK-BMS monitoring or charging protection.
+- MQTT is used inside Node-RED to read Venus OS values; it is not the ESP32 display transport. The display transport remains TCP from Node-RED to the Pi bridge and BLE from the Pi to the ESP32.
 
 ## JK-BMS data and charging-protection boundary
 
