@@ -366,3 +366,62 @@ Inspection of upstream SetupHelper v9.7 `PackageManager.py` confirms:
 - The inspected code does not add GitHub authentication to either request.
 
 The project repository is public. The GUI v1 PackageManager workflow can read the version and download the selected branch archive. The branch may intentionally contain an untested development version so the user can install and test it; acceptance and tagging happen only after successful testing.
+
+
+---
+
+## Milestone — bidirectional Node-RED ↔ Raspberry Pi ↔ ESP32 test confirmed (2026-11-24)
+
+This update supersedes the earlier planning statements above that Node-RED/TCP integration was still deferred or pending. It records a live test performed by the user on the existing development setup; it does not claim clean-install or SetupHelper acceptance.
+
+### Test setup and confirmed data path
+
+- Raspberry Pi bridge package version marker: **v0.1.3** (unchanged).
+- ESP32 firmware: **v0.3.8** on branch `v0.3.8-cleanup-demo`.
+- Node-RED TCP server: port **5005**.
+- Existing TCP framing remains newline-delimited UTF-8 records.
+- Existing BLE GATT service and characteristics remain in use:
+  - Service: `8f7a0001-6d5b-4c3a-9e2f-1a0b2c3d4e5f`
+  - Pi TX / notify: `8f7a0002-6d5b-4c3a-9e2f-1a0b2c3d4e5f`
+  - Pi RX / write: `8f7a0003-6d5b-4c3a-9e2f-1a0b2c3d4e5f`
+
+### Pi → ESP32 direction
+
+The user observed the Pi log receiving and forwarding the Node-RED telemetry notification:
+
+`Pi -> ESP32: 79 bytes`
+
+Payload:
+`{"test":"VictronDisplay","teller":52596,"spanning":13.4,"stroom":-2.5,"soc":85}`
+
+The next observed telemetry record carried counter **52597**. The user confirmed the ESP32 Demo screen displays the values and the increasing counter. Wi-Fi settings and PWM brightness controls were also confirmed working on the v0.3.8 firmware.
+
+### ESP32 → Pi → Node-RED direction
+
+The Pi log showed this BLE GATT write from the ESP32:
+
+`{"source":"VictronDisplay7","type":"test","firmware":"v0.3.8","counter":49}`
+
+The bridge then logged:
+
+`TCP: ESP32 -> Node-RED: 75 bytes`
+
+The user confirmed that the same JSON message appeared in the Node-RED Debug node. This confirms delivery through the TCP connection to Node-RED, not merely an attempted send recorded by the Pi.
+
+### Result
+
+The following complete bidirectional test path is confirmed:
+
+1. Node-RED → TCP → Python bridge on Pi → BLE GATT notification → ESP32-S3.
+2. ESP32-S3 → BLE GATT write → Python bridge on Pi → TCP → Node-RED Debug.
+
+The transport-level integration between Node-RED, TCP, the Pi bridge, BLE, and ESP32 is therefore **verified on the current test setup**.
+
+### Explicit limits of this milestone
+
+- Test messages and fake telemetry are still being used; this is not the final production data/command schema.
+- Production value mapping, validation, stale-data handling, and application behavior are not thereby accepted.
+- BLE disconnect/reconnect and Node-RED/TCP restart recovery have not been confirmed by this milestone.
+- This does not validate SetupHelper installation/update/uninstall, clean-Pi installation, or reboot behavior.
+- No live Pi files, services, configuration, or Node-RED flows were changed as part of recording this documentation milestone.
+- Raspberry Pi package version remains **v0.1.3**; ESP32 firmware version remains **v0.3.8**. These version histories are independent.
