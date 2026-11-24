@@ -11,7 +11,7 @@ MAX_MESSAGE_SIZE = FRAME_DATA_SIZE * 255
 def fragment_message(data, message_id):
     """Split one byte message into ordered frames, each no larger than 20 bytes.
 
-    Frame layout: magic[2], version[1], message_id[1], index[1], count[1], data[0..14].
+    Frame layout: magic[2], version[1], message_id[1], index[1], count[1], payload (up to 14 bytes).
     """
     data = bytes(data)
     if not data:
