@@ -47,7 +47,7 @@ Rules:
 - All fragments in one message carry the same message ID and fragment count.
 - The ESP32 accepts only the expected next fragment for the active message. A new index-zero fragment starts a new assembly.
 - The ESP32 discards malformed, out-of-order, oversized, or incomplete assemblies. A 3-second gap expires the active assembly.
-- The maximum logical message size is 3,570 bytes (255 × 14). The ESP32 assembly buffer is 512 bytes, which is sufficient for the current compact battery JSON payload.
+- The maximum logical message size is 512 bytes, matching the ESP32 assembly buffer. At 14 data bytes per fragment this requires at most 37 notifications; larger messages are rejected by the Pi before transmission.
 - The JSON parser is called only after all fragments have been assembled. Legacy unfragmented JSON remains accepted if it fits one negotiated notification.
 - The existing GATT UUIDs and the reverse ESP32-to-Pi write path are unchanged.
 
