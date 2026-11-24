@@ -4,6 +4,26 @@
 
 ## Target outcome
 
+## Current user priority — 2026-11-24 (supersedes the Nov 20 SetupHelper-first sequence)
+
+The user explicitly changed the immediate development priority: finish ESP32 firmware **v0.3.9**, its matching Node-RED battery telemetry nodes, and the supporting Pi BLE transport/documentation first. The earlier Nov 20 instruction to finish SetupHelper acceptance before Node-RED/TCP work is superseded for the current phase. Do not pause v0.3.9 work to return to SetupHelper. SetupHelper clean-install/update/uninstall/reboot acceptance remains a later, separate milestone.
+
+### Current v0.3.9 implementation in progress
+- ESP32 firmware branch: `VictronDisplay7/v0.3.9-battery-display`.
+- Pi bridge branch: `VantourerDisplayBridge/setuphelper-package`.
+- ESP32 source parses compact battery JSON and displays SmartShunt 1 (293), SmartShunt 2 (294), and starter battery voltage.
+- Pi Node-RED Function emits the matching compact schema. An importable Node-RED tab provides the Function and Debug node; it must be wired to the existing MQTT Input `alle accus` and existing `gebruik actieve TCP-client` Function. Do not recreate either existing node or the TCP server.
+- Pi BLE GATT TX now fragments logical messages into <=20-byte notifications; ESP32 firmware reassembles the frames before JSON parsing. This avoids reliance on the unconfirmed negotiated ATT MTU.
+- Pi package marker is now v0.1.4. It is independent of ESP32 v0.3.9 and Node-RED flow versioning.
+
+### Validation still required
+- The Node-RED Function has only been exercised against synthetic fixtures. The complete raw live MQTT payload structure was not preserved; confirm the actual field shape in the existing Debug path before calling the mapping live-validated.
+- No ESP-IDF build or flash has been run for v0.3.9. User controls both.
+- No live Node-RED import/deploy, Raspberry Pi package update, or Pi service restart has been performed.
+- No live BLE fragmentation/reassembly test has been performed.
+- The SetupHelper package acceptance sequence remains pending and is not the current priority.
+
+
 ## Agreed development order (Nov 20, 2026)
 
 SetupHelper is the immediate priority. Complete and validate the SetupHelper package for the current BLE-only bridge before beginning Node-RED/TCP development. During this phase, do not implement Python TCP integration or modify/import Node-RED flows. Node-RED flow files remain independently version-controlled and outside SetupHelper. Once the SetupHelper phase is accepted, proceed with Node-RED/TCP integration and update the package later if the bridge gains new runtime components.
