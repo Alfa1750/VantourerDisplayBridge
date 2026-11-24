@@ -7,7 +7,7 @@ import os
 import signal
 from collections import deque
 from tcp_client import NodeRedTcpClient
-from ble_framing import fragment_message, MAX_MESSAGE_SIZE
+from ble_framing import fragment_message
 
 BLUEZ='org.bluez'
 OM='org.freedesktop.DBus.ObjectManager'
@@ -81,18 +81,19 @@ class Characteristic(dbus.service.Object):
         if not self.notifying:
             print('Pi -> ESP32: notification niet actief; bericht overgeslagen',flush=True)
             return
+        message_id=self._tx_message_id
         try:
-            fragments=fragment_message(data,self._tx_message_id)
+            fragments=fragment_message(data,message_id)
         except ValueError as error:
             print('Pi -> ESP32: {}'.format(error),flush=True)
             return
 
-        self._tx_message_id=(self._tx_message_id+1)&0xff
+        self._tx_message_id=(message_id+1)&0xff
         for frame in fragments:
             self._tx_fragments.append(frame)
 
         print('Pi -> ESP32: {} bytes in {} BLE-fragmenten (bericht {})'.format(
-            len(data),len(fragments),self._tx_message_id),flush=True)
+            len(data),len(fragments),message_id),flush=True)
         if not self._tx_timer_id:
             self._tx_timer_id=GLib.timeout_add(
                 BLE_FRAGMENT_INTERVAL_MS,self._send_next_fragment)
