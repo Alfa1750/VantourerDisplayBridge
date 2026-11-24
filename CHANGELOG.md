@@ -1,5 +1,17 @@
 # Changelog
 
+## Development note — Venus OS MQTT battery input investigation (2026-11-24; not a package version)
+- Confirmed the test Pi and camper Pi both run Venus OS 3.85 and are on the same LAN. The camper Pi broker at 192.168.1.113 was successfully paired; MQTT over TLS port 8883 reached Connected in Node-RED. Pairing secrets are intentionally not recorded.
+- Confirmed the MQTT broker is a reusable broker configuration, not a wired flow node. MQTT Input nodes select that broker configuration.
+- Confirmed recurring messages arrive approximately every five seconds from `N/b827eb14d4ec/system/0/Batteries`, including after the Inject node was disconnected. No Inject/keepalive click is required for these observed recurring messages.
+- Identified battery entries: 187Ah accu (battery instance 293, active battery service), Startaccu (voltage-only entry), Shunt 2 (instance 294), and a temporary USB-connected JK BMS (instance 2).
+- Agreed design: one MQTT Input for `N/b827eb14d4ec/system/0/Batteries` feeds one Function node that selects Shunt 1 (293), Shunt 2 (294), and starter battery voltage by stable identity. Exclude the temporary USB JK BMS entry.
+- JK BMS 1 and JK BMS 2 will instead be read directly over BLE by a separate Raspberry Pi JK-BMS monitor; they are not part of this MQTT normalization Function.
+- The existing individual wildcard MQTT Input nodes for instances 293 and 294 have already been created and tested; do not recreate them. Their quoted output showed Shunt 1 voltage/current/power and time-since-full, and Shunt 2 current/power and time-since-full. The system battery overview separately showed SOC for both shunts and starter battery voltage.
+- Future camper deployment is intended to retain the same MQTT Input + Function design and select the local Venus OS MQTT broker instead of the remote camper-Pi broker. Local broker configuration details remain to be verified.
+- No Node-RED flow export was committed; no Pi files/configuration/services or firmware were changed. This note records the observed design and progress only; no production Function, JSON schema, freshness policy or release was implemented.
+
+
 ## v0.1.3 — TCP framing correction and bidirectional end-to-end test confirmed (2026-11-24)
 - Append the required newline to every Node-RED-to-Pi TCP record in the manual test flow, including periodic JSON, manual test text, and echo responses.
 - Keep the TCP connection persistent instead of allowing unterminated records to accumulate until the 8192-byte limit forces a reconnect.
