@@ -11,20 +11,21 @@ SetupHelper package for the Raspberry Pi BLE GATT server used by the Vantourer E
 
 ## Scope of this package
 
-This package currently contains the BLE-only bridge foundation:
+This package contains the Raspberry Pi bridge used by the ESP32 display:
 - Raspberry Pi acts as BLE Peripheral / GATT Server.
 - ESP32 acts as BLE Central / GATT Client.
-- Pi-to-ESP32 notifications and ESP32-to-Pi writes use the project's custom GATT service.
+- Pi-to-ESP32 notifications and ESP32-to-Pi writes use the project's custom GATT service. Pi-to-ESP32 messages are application-fragmented into 20-byte notifications, so the transport does not depend on a negotiated large ATT MTU.
+- A persistent TCP client connects to the existing Node-RED TCP server on port 5005 and bridges newline-delimited records to/from BLE.
 - The service is managed by SetupHelper v9.7 using the package's `services/VantourerDisplayBridge/` directory.
 - Logs are written to `/var/log/VantourerDisplayBridge` and rotated by multilog. The log service creates this directory with `mkdir -p` before starting multilog, so a clean installation does not depend on a manually pre-created log folder.
 
-Node-RED flows and TCP integration are deliberately out of scope for this package phase. Node-RED flows will remain separately maintained and will not be installed or modified by SetupHelper.
+Node-RED flows remain separately maintained and are not installed or modified by SetupHelper. The Pi bridge package contains the TCP transport; Node-RED flow nodes are imported and wired separately. See `docs/NODERED_BATTERY_DISPLAY.md`.
 
 ## Package status
 
 This is a development branch, not a release. The required deployment workflow is the normal GUI v1 → SetupHelper / PackageManager → Update flow. PackageManager fetches the package version from `raw.githubusercontent.com` and the source archive from `github.com/<user>/<package>/archive/<branch>.tar.gz`. These requests are unauthenticated in the inspected SetupHelper implementation. The repository is now public, so these endpoints can be accessed without GitHub authentication. Do not use SD/USB archives as a development workaround. The configured `gitHubInfo` value is `Alfa1750:setuphelper-package`.
 
-The BLE source in this package is based on the captured active reference-Pi source. The temporary periodic `Hallo vanaf Raspberry Pi` test notification has been removed. No production telemetry or TCP/Node-RED integration is implemented yet.
+The BLE GATT server and TCP client are project-owned source. Pi-to-ESP32 BLE notifications use the versioned `VD` application-fragment header. The current v0.3.9 development flow normalizes SmartShunt 1, SmartShunt 2 and starter battery telemetry to the ESP32 JSON contract. Live Node-RED-to-display validation is still pending.
 
 ## Runtime prerequisites observed on the reference device
 
