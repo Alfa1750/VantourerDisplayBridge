@@ -44,7 +44,7 @@ The import template `flows/node-red/battery-display-v039-import.json` contains a
 
 ## Validation boundary
 
-The Node-RED Function has been exercised against synthetic test fixtures representing the inventory fields and values recorded in the project notes. The complete raw MQTT payload structure from the live Node-RED Debug output was not preserved in the repository, so compatibility with every live field spelling/container remains to be confirmed in Node-RED. Do not describe the live MQTT-to-display path as tested until the imported nodes are wired and the actual output is observed in Debug and on the ESP32.
+**Live test confirmed on 2026-11-24:** the user confirmed that the v0.3.9 battery JSON reached the ESP32 display with Pi bridge v0.1.4. The Pi log recorded 272–274-byte logical messages split into 20 BLE fragments. This confirms the live tested path on that setup; it does not prove compatibility with every possible Venus OS payload shape or production readiness. The complete live test tab and its wiring are documented in docs/NODERED_LIVE_TEST_FLOW.md.
 
 ## Existing flow safety
 
@@ -52,3 +52,6 @@ The Node-RED Function has been exercised against synthetic test fixtures represe
 - Do not re-enable the overlapping wildcard test input `Camper-Pi MQTT – Testdata`; it caused duplicate battery overview messages.
 - Do not create another TCP server or broker configuration.
 - Node-RED flows are independently maintained and are not installed by the Raspberry Pi SetupHelper package.
+
+
+For the complete live test flow (including the actual MQTT/TCP settings and the two pre-existing TCP routing Functions), see [NODERED_LIVE_TEST_FLOW.md](NODERED_LIVE_TEST_FLOW.md).
