@@ -30,8 +30,8 @@ class BleFramingTests(unittest.TestCase):
 
     def test_maximum_message(self):
         frames = fragment_message(b"x" * MAX_MESSAGE_SIZE, 0)
-        self.assertEqual(len(frames), 255)
-        self.assertEqual(len(frames[-1]), NOTIFICATION_VALUE_MAX)
+        self.assertEqual(len(frames), (MAX_MESSAGE_SIZE + FRAME_DATA_SIZE - 1) // FRAME_DATA_SIZE)
+        self.assertEqual(len(frames[-1]), FRAME_HEADER_SIZE + (MAX_MESSAGE_SIZE % FRAME_DATA_SIZE or FRAME_DATA_SIZE))
 
     def test_empty_and_oversized_messages_rejected(self):
         with self.assertRaises(ValueError):
