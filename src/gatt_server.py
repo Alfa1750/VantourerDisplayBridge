@@ -7,6 +7,7 @@ import os
 import signal
 from collections import deque
 from tcp_client import NodeRedTcpClient
+from ble_framing import fragment_message, MAX_MESSAGE_SIZE
 
 BLUEZ='org.bluez'
 OM='org.freedesktop.DBus.ObjectManager'
@@ -21,14 +22,7 @@ TX_UUID='8f7a0002-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
 RX_UUID='8f7a0003-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
 mainloop=None
 
-# Application-level BLE framing: 20-byte values work with the minimum ATT MTU
-# of 23 bytes (20-byte notification payload), independent of MTU negotiation.
-BLE_FRAME_MAGIC = b"VD"
-BLE_FRAME_VERSION = 1
-BLE_NOTIFICATION_VALUE_MAX = 20
-BLE_FRAME_HEADER_SIZE = 6
-BLE_FRAME_DATA_SIZE = BLE_NOTIFICATION_VALUE_MAX - BLE_FRAME_HEADER_SIZE
-BLE_MAX_MESSAGE_SIZE = BLE_FRAME_DATA_SIZE * 255
+# Notifications are sent conservatively at 20 bytes, valid at the minimum ATT MTU.
 BLE_FRAGMENT_INTERVAL_MS = 10
 
 class Characteristic(dbus.service.Object):
@@ -87,22 +81,18 @@ class Characteristic(dbus.service.Object):
         if not self.notifying:
             print('Pi -> ESP32: notification niet actief; bericht overgeslagen',flush=True)
             return
-        if not data or len(data)>BLE_MAX_MESSAGE_SIZE:
-            print('Pi -> ESP32: berichtlengte ongeldig ({} bytes; maximum {}); verworpen'.format(
-                len(data),BLE_MAX_MESSAGE_SIZE),flush=True)
+        try:
+            fragments=fragment_message(data,self._tx_message_id)
+        except ValueError as error:
+            print('Pi -> ESP32: {}'.format(error),flush=True)
             return
 
         self._tx_message_id=(self._tx_message_id+1)&0xff
-        fragment_count=(len(data)+BLE_FRAME_DATA_SIZE-1)//BLE_FRAME_DATA_SIZE
-        for index in range(fragment_count):
-            start=index*BLE_FRAME_DATA_SIZE
-            payload=data[start:start+BLE_FRAME_DATA_SIZE]
-            frame=(BLE_FRAME_MAGIC+bytes((BLE_FRAME_VERSION,self._tx_message_id,
-                                          index,fragment_count))+payload)
+        for frame in fragments:
             self._tx_fragments.append(frame)
 
         print('Pi -> ESP32: {} bytes in {} BLE-fragmenten (bericht {})'.format(
-            len(data),fragment_count,self._tx_message_id),flush=True)
+            len(data),len(fragments),self._tx_message_id),flush=True)
         if not self._tx_timer_id:
             self._tx_timer_id=GLib.timeout_add(
                 BLE_FRAGMENT_INTERVAL_MS,self._send_next_fragment)
