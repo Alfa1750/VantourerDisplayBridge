@@ -17,10 +17,9 @@ The user explicitly changed the immediate development priority: finish ESP32 fir
 - Pi package marker is now v0.1.4. It is independent of ESP32 v0.3.9 and Node-RED flow versioning.
 
 ### Validation still required
-- The Node-RED Function has only been exercised against synthetic fixtures. The complete raw live MQTT payload structure was not preserved; confirm the actual field shape in the existing Debug path before calling the mapping live-validated.
-- No ESP-IDF build or flash has been run for v0.3.9. User controls both.
-- No live Node-RED import/deploy, Raspberry Pi package update, or Pi service restart has been performed.
-- No live BLE fragmentation/reassembly test has been performed.
+- The 2026-11-24 live test supersedes the earlier validation state below: the user confirmed that battery data reached the ESP32 display with Pi v0.1.4, and the Pi log recorded 272–274-byte messages split into 20 BLE fragments. This validates the tested live payload and path, not every possible MQTT payload variant.
+- The user performed the ESP32 v0.3.9 build/flash and Pi v0.1.4 package update; this documentation records the resulting test, not assistant-executed operations.
+- Clean-install/SetupHelper lifecycle acceptance, reboot behavior, and recovery from TCP/BLE disconnects remain unverified.
 - The SetupHelper package acceptance sequence remains pending and is not the current priority.
 
 
