@@ -1,6 +1,6 @@
 # BLE display protocol — design decisions
 
-**Status:** Bidirectional text transport verified between the manually developed Raspberry Pi bridge and ESP32 firmware v0.3.6; binary display protocol design not yet finalized.  
+**Status:** Bidirectional text transport was verified on the development setup. Application-level fragmentation for Pi-to-ESP32 JSON notifications is now implemented in the GitHub bridge and v0.3.9 firmware source; hardware validation remains pending. The future compact binary display-frame design is not finalized.  
 **Scope:** Raspberry Pi VantourerDisplayBridge ↔ ESP32-S3 Waveshare 7B display.
 
 > **Versioning clarification:** Version **0.3.6 refers only to the ESP32 firmware**. It is not a Raspberry Pi bridge version, package version, or release number. During the original Pi-side development, changes were made manually and no consistent Pi software versioning scheme was maintained. Do not assign the ESP32 version number to the Pi code or imply that the Pi bridge had a corresponding v0.3.6 release.
@@ -26,6 +26,32 @@ Test history from the conversation **“ESP IDF versie instellen” (20 November
 The reverse direction had also been tested: the Pi log showed the ESP32 enabling notifications and receiving the ESP32 text `Hallo vanaf ESP32`. This demonstrates text transport in both directions between the manually developed Pi bridge and the ESP32 firmware.
 
 **Evidence boundary:** These tests prove bidirectional BLE text transport and that the 20-byte truncation was resolved by the ESP32-side change in firmware v0.3.6. They do not, by themselves, prove actual Victron command forwarding through Node-RED or operation of MPPT/Orion controls. The exact negotiated MTU value is not recorded here; do not invent it. No Pi-side software version corresponding to ESP32 v0.3.6 is known. This milestone is separate from the later binary-frame design below.
+
+## Implemented application fragmentation for JSON telemetry
+
+The v0.3.9 battery overview currently uses compact JSON at the application layer. To avoid relying on a particular negotiated ATT MTU, the Pi and ESP32 use a small application-fragment header. Each notification value is capped at 20 bytes, which is valid with the minimum ATT MTU of 23.
+
+Frame layout (all fields are one byte):
+
+| Offset | Size | Meaning |
+|---:|---:|---|
+| 0 | 2 | Magic bytes ASCII `VD` |
+| 2 | 1 | Framing version; currently `1` |
+| 3 | 1 | Message ID; increments modulo 256 |
+| 4 | 1 | Fragment index, zero-based |
+| 5 | 1 | Total fragment count, 1–255 |
+| 6 | 0–14 | Fragment payload bytes |
+
+Rules:
+- The Pi splits each TCP record into payload chunks of at most 14 bytes and sends one notification every 10 ms.
+- All fragments in one message carry the same message ID and fragment count.
+- The ESP32 accepts only the expected next fragment for the active message. A new index-zero fragment starts a new assembly.
+- The ESP32 discards malformed, out-of-order, oversized, or incomplete assemblies. A 3-second gap expires the active assembly.
+- The maximum logical message size is 3,570 bytes (255 × 14). The ESP32 assembly buffer is 512 bytes, which is sufficient for the current compact battery JSON payload.
+- The JSON parser is called only after all fragments have been assembled. Legacy unfragmented JSON remains accepted if it fits one negotiated notification.
+- The existing GATT UUIDs and the reverse ESP32-to-Pi write path are unchanged.
+
+This is transport framing around the current JSON payload. It is **not** the future fixed-layout binary telemetry protocol described below. There is no application-level acknowledgement or retransmission; BLE connection loss or a missing fragment causes that logical message to be discarded.
 
 ## Compact binary representation
 
