@@ -102,7 +102,7 @@ The Function output should include only:
 
 Do not include the USB-connected JK BMS entry in this MQTT display-data Function. The JK BMS devices are to be disconnected from USB and read separately by a future Raspberry Pi BLE monitor that reads both JK BMS batteries directly over BLE. That monitor is a separate component/repository and will forward its own telemetry to Node-RED. Do not route JK BMS data through the SmartShunt MQTT normalization.
 
-The Function should tolerate missing fields and should not silently substitute zero for unavailable values. The exact output JSON schema, timestamps/freshness policy, and downstream TCP message schema are not yet implemented or accepted.
+The Function should tolerate missing fields and should not silently substitute zero for unavailable values. The v0.3.9 compact output schema is now implemented in `flows/node-red/normalize_batteries_function.js`; the importable Node-RED Function/Debug template is `flows/node-red/battery-display-v039-import.json`. The exact live field nesting still needs confirmation in the user's Node-RED Debug output.
 
 ## Intended deployment portability
 
@@ -121,6 +121,15 @@ The local broker selector/port/TLS details must be verified on the camper Pi bef
 - A previous proposed direct read request using `R/<portal-id>/battery/<instance>/Soc` was not verified. Do not treat that request as a confirmed way to retrieve SOC or consumed Ah.
 - No Node-RED flow export was committed in this step. No Node-RED flow, Pi configuration, service, or firmware was modified.
 
-## Next step
+## v0.3.9 implementation update (2026-11-24)
 
-Create and validate the single Function node using the already observed `system/0/Batteries` payload. First confirm the exact field names and behavior from live messages, then document the resulting output schema. Keep the MQTT Input and BLE/TCP transport work separate.
+- The normalization Function now selects instances 293 and 294, plus Startaccu by name (with a unique service `:1` fallback). It excludes the USB JK BMS instance 2.
+- It emits `source=VantourerDisplay`, `type=battery`, `schema=1`, with `s1`/`s2` fields `v`, `i`, `p`, `soc` and `st.v`. Missing values are JSON `null`; measured zero values are preserved.
+- It recognizes the observed Venus measurement key spellings `Dc/0/Voltage`, `Dc/0/Current`, `Dc/0/Power` as well as equivalent normalized names and nested `{value: ...}` wrappers.
+- The import template contains a new Function node, a Debug node and explicit wiring notes. It deliberately reuses the existing MQTT Input `alle accus`, the existing active TCP-client routing Function and the existing TCP server. It does not create another broker or server.
+- Synthetic test fixtures cover both shunts, starter battery selection, JK BMS exclusion, nested numeric wrappers, partial source data, invalid values and real zero values.
+- GitHub Actions run `45443182121` completed successfully. The run passed Python syntax checks, existing TCP client tests, the new Node-RED Function tests, JSON validation for both flow files, and package-layout checks.
+
+## Next step requiring the live Node-RED setup
+
+Import `flows/node-red/battery-display-v039-import.json`, connect the existing MQTT Input to the new Function, and connect the Function output to the existing `gebruik actieve TCP-client` Function. Keep the new Debug node enabled for the first observation. Compare the real compact JSON output with the documented schema before deploying the live data path. The actual Pi/ESP32 BLE fragmentation/reassembly and firmware display still require the user's controlled hardware test.
