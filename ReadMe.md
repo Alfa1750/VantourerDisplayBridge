@@ -25,7 +25,7 @@ Node-RED flows remain separately maintained and are not installed or modified by
 
 This is a development branch, not a release. The required deployment workflow is the normal GUI v1 → SetupHelper / PackageManager → Update flow. PackageManager fetches the package version from `raw.githubusercontent.com` and the source archive from `github.com/<user>/<package>/archive/<branch>.tar.gz`. These requests are unauthenticated in the inspected SetupHelper implementation. The repository is now public, so these endpoints can be accessed without GitHub authentication. Do not use SD/USB archives as a development workaround. The configured `gitHubInfo` value is `Alfa1750:setuphelper-package`.
 
-The BLE GATT server and TCP client are project-owned source. Pi-to-ESP32 BLE notifications use the versioned `VD` application-fragment header. The current v0.3.9 development flow normalizes SmartShunt 1, SmartShunt 2 and starter battery telemetry to the ESP32 JSON contract. Live Node-RED-to-display validation is still pending.
+The BLE GATT server and TCP client are project-owned source. Pi-to-ESP32 BLE notifications use the versioned `VD` application-fragment header. The current v0.3.9 development flow normalizes SmartShunt 1, SmartShunt 2 and starter battery telemetry to the ESP32 JSON contract. A live battery telemetry test has been confirmed with ESP32 firmware v0.3.9 and Pi bridge v0.1.4; see docs/NODERED_LIVE_TEST_FLOW.md and docs/PROJECT_STATUS.md. This does not establish clean-install or production acceptance.
 
 ## Runtime prerequisites observed on the reference device
 
