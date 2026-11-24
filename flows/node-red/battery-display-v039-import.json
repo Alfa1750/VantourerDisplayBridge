@@ -1,0 +1,56 @@
+[
+  {
+    "id": "vdb039battery001",
+    "type": "tab",
+    "label": "Vantourer accu-overzicht v0.3.9",
+    "disabled": false,
+    "info": "Importtemplate. Verbind de bestaande MQTT Input N/<portal>/system/0/Batteries met de Function. Verbind de Function-uitgang ook met de bestaande Function 'gebruik actieve TCP-client'. De Debug-node is alleen voor controle."
+  },
+  {
+    "id": "vdb039battery002",
+    "type": "function",
+    "z": "vdb039battery001",
+    "name": "Normaliseer SmartShunts + startaccu",
+    "func": "/**\n * Node-RED Function: normalize Venus OS system/0/Batteries for ESP32 v0.3.9.\n *\n * Input: msg.payload.value from N/<portal>/system/0/Batteries.\n * Output: compact battery JSON expected by VictronDisplay7 v0.3.9.\n * Connect to the existing TCP-client routing Function; it appends the newline.\n *\n * Selected sources: SmartShunt instances 293 and 294, plus the starter battery.\n * The temporary USB-connected JK BMS (instance 2) is intentionally excluded.\n * Missing measurements are null; zero remains a valid measurement.\n */\nconst inventory = msg.payload && msg.payload.value;\nif (!Array.isArray(inventory)) {\n    node.warn(\"Accu-overzicht: msg.payload.value is geen array\");\n    return null;\n}\n\nfunction isRecord(value) {\n    return value !== null && typeof value === \"object\" && !Array.isArray(value);\n}\n\nfunction firstDefined(object, keys) {\n    if (!isRecord(object)) return undefined;\n    for (const key of keys) {\n        if (Object.prototype.hasOwnProperty.call(object, key) &&\n            object[key] !== null && object[key] !== undefined && object[key] !== \"\") {\n            return object[key];\n        }\n    }\n    return undefined;\n}\n\nfunction identity(item) {\n    return {\n        instance: firstDefined(item, [\"instance\", \"Instance\", \"device_instance\"]),\n        id: String(firstDefined(item, [\"id\", \"service\", \"service_id\", \"identifier\"]) || \"\"),\n        name: String(firstDefined(item, [\"name\", \"Name\", \"product_name\"]) || \"\")\n    };\n}\n\nfunction findShunt(instance) {\n    return inventory.find(item => {\n        const id = identity(item);\n        return Number(id.instance) === instance ||\n            id.id.endsWith(\":\" + instance) ||\n            id.id.endsWith(\"battery.\" + instance);\n    });\n}\n\nfunction findStarter() {\n    const named = inventory.find(item =>\n        /startaccu|starter(?: battery| accu)?/i.test(identity(item).name));\n    if (named) return named;\n\n    // Service instance suffix :1 is a fallback only; USB adapter names are not stable.\n    const fallback = inventory.filter(item =>\n        /com\\.victronenergy\\.battery\\.[^:]+:1$/.test(identity(item).id));\n    return fallback.length === 1 ? fallback[0] : undefined;\n}\n\nfunction normalizedKey(key) {\n    return String(key).toLowerCase().replace(/[^a-z0-9]/g, \"\");\n}\n\nfunction unwrapNumber(raw) {\n    if (isRecord(raw)) raw = firstDefined(raw, [\"value\", \"Value\"]);\n    if (typeof raw !== \"number\" && typeof raw !== \"string\") return null;\n    if (typeof raw === \"string\" && raw.trim() === \"\") return null;\n    const value = Number(raw);\n    return Number.isFinite(value) ? value : null;\n}\n\nfunction metric(item, aliases) {\n    const wanted = new Set(aliases.map(normalizedKey));\n    const containers = [item];\n    for (const key of [\"values\", \"measurements\", \"data\", \"value\"]) {\n        const nested = firstDefined(item, [key]);\n        if (isRecord(nested)) containers.push(nested);\n    }\n\n    for (const container of containers) {\n        if (!isRecord(container)) continue;\n        for (const key of Object.keys(container)) {\n            if (wanted.has(normalizedKey(key))) {\n                const value = unwrapNumber(container[key]);\n                if (value !== null) return value;\n            }\n        }\n    }\n    return null;\n}\n\nfunction shuntMeasurements(item) {\n    return {\n        v: metric(item, [\"voltage\", \"dc_voltage\", \"Dc/0/Voltage\", \"v\"]),\n        i: metric(item, [\"current\", \"dc_current\", \"Dc/0/Current\", \"i\"]),\n        p: metric(item, [\"power\", \"dc_power\", \"Dc/0/Power\", \"p\"]),\n        soc: metric(item, [\"soc\", \"state_of_charge\", \"StateOfCharge\"])\n    };\n}\n\nconst shunt1 = findShunt(293);\nconst shunt2 = findShunt(294);\nconst starter = findStarter();\nconst s1 = shuntMeasurements(shunt1);\nconst s2 = shuntMeasurements(shunt2);\nconst st = { v: metric(starter, [\"voltage\", \"dc_voltage\", \"Dc/0/Voltage\", \"v\"]) };\n\nconst hasMeasurements = [s1.v, s1.i, s1.p, s1.soc, s2.v, s2.i, s2.p, s2.soc, st.v]\n    .some(value => value !== null);\nif (!hasMeasurements) {\n    node.warn(\"Accu-overzicht: geen bruikbare SmartShunt/startaccu-meetwaarden gevonden\");\n    return null;\n}\n\nif (!shunt1 || !shunt2 || !starter) {\n    node.warn(\"Accu-overzicht gedeeltelijk: shunt1=\" + !!shunt1 +\n        \", shunt2=\" + !!shunt2 + \", startaccu=\" + !!starter);\n}\n\nmsg.payload = JSON.stringify({\n    source: \"VantourerDisplay\",\n    type: \"battery\",\n    schema: 1,\n    s1: s1,\n    s2: s2,\n    st: st\n});\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 430,
+    "y": 160,
+    "wires": [
+      [
+        "vdb039battery003"
+      ]
+    ]
+  },
+  {
+    "id": "vdb039battery003",
+    "type": "debug",
+    "z": "vdb039battery001",
+    "name": "v0.3.9 batterij JSON",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "vdb039battery004",
+    "type": "comment",
+    "z": "vdb039battery001",
+    "name": "Aansluiten op bestaande nodes",
+    "info": "1. MQTT Input: N/<portal>/system/0/Batteries (de bestaande 'alle accus'-input).\n2. Verbind deze met 'Normaliseer SmartShunts + startaccu'.\n3. Verbind de Function-uitgang met de bestaande 'gebruik actieve TCP-client' Function; die voegt de newline toe en routeert naar de bestaande TCP-server.\n4. Laat de Debug-node tijdelijk aangesloten om het JSON-pakket te controleren.\nGeen nieuwe MQTT-broker of TCP-server aanmaken.",
+    "x": 440,
+    "y": 250,
+    "wires": []
+  }
+]
