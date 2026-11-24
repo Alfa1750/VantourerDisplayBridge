@@ -7,7 +7,7 @@ Convert the existing Venus OS battery overview MQTT message into the compact JSO
 ## Existing input and source selection
 
 - MQTT topic: `N/b827eb14d4ec/system/0/Batteries` (use the existing portal/device topic configured in the live flow).
-- The MQTT Input already receives recurring updates approximately every five seconds. No Inject or keepalive node is required.
+- MQTT updates are received from the live input without an Inject/keepalive node. Observed intervals are variable (examples ranged from about 5 to 50 seconds); the reason is not yet proven.
 - SmartShunt 1 is selected by battery instance 293.
 - SmartShunt 2 is selected by battery instance 294.
 - Starter battery is selected by its Startaccu/Starter name; a unique Venus battery service suffix `:1` is a fallback.
