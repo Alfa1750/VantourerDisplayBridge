@@ -445,3 +445,39 @@ The transport-level integration between Node-RED, TCP, the Pi bridge, BLE, and E
 - This does not validate SetupHelper installation/update/uninstall, clean-Pi installation, or reboot behavior.
 - No live Pi files, services, configuration, or Node-RED flows were changed as part of recording this documentation milestone.
 - Raspberry Pi package version remains **v0.1.3**; ESP32 firmware version remains **v0.3.8**. These version histories are independent.
+
+
+## Milestone — live battery telemetry test confirmed (2026-11-24, ESP32 v0.3.9 + Pi v0.1.4)
+
+This section supersedes earlier statements in this file that live BLE fragmentation/reassembly and the v0.3.9 MQTT-to-display path were still pending. It records the user's successful test on the existing camper setup. It does not establish clean-install, SetupHelper acceptance, or production-flow acceptance.
+
+### Exact working combination
+
+- ESP32 display firmware: **VictronDisplay7 v0.3.9**.
+- Raspberry Pi bridge package marker: **VantourerDisplayBridge v0.1.4** (the user checked /data/VantourerDisplayBridge/version).
+- Pi bridge source on the development branch includes src/gatt_server.py, src/tcp_client.py and src/ble_framing.py.
+- Venus OS / Node-RED environment: Venus OS 3.85; the live camper MQTT broker is reached over TLS at 192.168.1.113:8883.
+- Node-RED test tab: **BLE echte data test**. The complete node configuration and wiring are recorded in docs/NODERED_LIVE_TEST_FLOW.md. The actual live Node-RED flow remains independently maintained on the Pi and is not installed by this package.
+- The user verified the Pi package marker as v0.1.4, confirmed the running bridge service, and observed Pi log entries showing 272–274-byte battery JSON messages split into 20 BLE fragments per logical message.
+- The ESP32 showed the received battery data on its display. This confirms the live battery telemetry path on this setup:
+  Venus OS MQTT → Node-RED normalization Function → Node-RED TCP server → Pi TCP client → Pi BLE GATT notifications (application fragments) → ESP32 v0.3.9 reassembly/parser/display.
+
+### Flow and data contract
+
+- MQTT Input node: alle accus, topic N/b827eb14d4ec/system/0/Batteries, QoS 2, auto-detect, broker 192.168.1.113:8883 with TLS configuration Victron TLS.
+- The input feeds the normalization Function and a separate raw MQTT Debug node (the raw Debug node is present but disabled in the supplied export).
+- Normalization selects SmartShunt instances **293** and **294**, plus the starter battery by name (unique service-instance :1 fallback). The temporary USB-connected JK BMS instance **2** is excluded.
+- Output JSON contract: source=VantourerDisplay, type=battery, schema=1; s1 and s2 each contain v/i/p/soc; st contains v. Missing measurements are null; measured zero remains zero.
+- The normalized output branches to the active JSON Debug node v0.3.9 batterij JSON and to gebruik actieve TCP-client. The routing Function sends the JSON as UTF-8 with a trailing newline to the TCP server's active client.
+- TCP server: port 5005, stream mode, UTF-8, newline delimiter LF, keep-alive timeout 6000 ms, application socket timeout 60000 ms.
+- Full node-by-node configuration and both existing TCP routing Functions are in docs/NODERED_LIVE_TEST_FLOW.md.
+
+### Observations and limits
+
+- The Pi log showed logical messages of 272–274 bytes, each split into 20 BLE notifications; the ESP32 displayed the resulting battery data. BLE fragmentation and display reception are therefore live-tested for these messages.
+- TCP connections were observed to close and reconnect at times. Re-deploying the Node-RED flow restored operation. This test does not prove the cause of those TCP disconnects.
+- Raw MQTT Debug output and normalized JSON Debug output showed matching message timestamps in the user's test. The irregular intervals were already present at the MQTT Input output; the normalization Function was not dropping those messages in that observation.
+- Message intervals varied (including approximately 5, 10, 20, 35 and 50 seconds). The camper was charging from solar and other charging sources; changing measured values are a plausible explanation, but the publication trigger/interval behavior has **not** been proven.
+- Do not attribute the irregular intervals to Pi bridge v0.1.4 without further evidence.
+- This milestone does not validate every possible MQTT payload shape, reconnect/restart recovery, SetupHelper clean installation, uninstall, reboot behavior, or the final production Node-RED flow.
+- The user controls all live-system changes. No Node-RED flow, Pi configuration, service, firmware, build or flash was changed as part of this documentation update.
