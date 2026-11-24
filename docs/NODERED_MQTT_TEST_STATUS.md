@@ -37,6 +37,21 @@ The existing per-device test subscriptions were:
 
 These are already created and tested in the user's Node-RED flow. Do not instruct the user to recreate them.
 
+## Confirmed duplicate-message cause — overlapping MQTT subscriptions (2026-11-24)
+
+A duplicate-output problem was reproduced and resolved in the `mqtt test` flow:
+
+- The intended MQTT Input node `alle accus` subscribed to the exact topic `N/b827eb14d4ec/system/0/Batteries`.
+- A second MQTT Input node, `Camper-Pi MQTT – Testdata`, used the wildcard subscription `N/+/system/0/#` and the same reusable MQTT broker configuration.
+- The wildcard subscription also matches `N/b827eb14d4ec/system/0/Batteries`: `+` matches the portal/device segment and `#` matches the remaining path, including `system/0/Batteries`.
+- With both MQTT Input nodes enabled, the same battery inventory appeared twice in Debug at the same timestamp with identical payload values but different Node-RED `msg._msgid` values. This showed two separately-created Node-RED messages; by itself, different `_msgid` values do not prove that Venus OS published twice.
+- The user disabled `Camper-Pi MQTT – Testdata` (the node was retained, not deleted) and deployed the flow.
+- After that change, the `alle accus` path produced one message approximately every five seconds. The user confirmed the duplicate output was gone.
+
+**Future troubleshooting rule:** when an MQTT Input/Debug path produces identical outputs more than once, inspect every enabled MQTT Input node using the same broker configuration and look for overlapping exact and wildcard topic filters (`+` and `#`). Do not assume that different `msg._msgid` values mean the publisher sent duplicate publications. Temporarily disabling the suspected overlapping subscription is a useful controlled confirmation; retain the node until its purpose is reviewed.
+
+This is a confirmed cause for this specific flow and configuration. It does not mean every duplicate MQTT message is necessarily caused by overlapping subscriptions; check the actual topic filters and reproduce the result before changing a flow.
+
 ## Battery inventory observed from `system/0/Batteries`
 
 The topic payload contained `value: array[4]`. The four entries observed were:
