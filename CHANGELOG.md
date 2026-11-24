@@ -1,5 +1,15 @@
 # Changelog
 
+## Live validation note — ESP32 v0.3.9 + Pi v0.1.4 + Node-RED battery test (2026-11-24)
+- User confirmed the live battery telemetry test works on the camper setup with ESP32 firmware v0.3.9 and Raspberry Pi bridge package v0.1.4.
+- Pi log showed 272–274-byte battery JSON records sent as 20 BLE fragments; the ESP32 received and displayed the battery data.
+- The complete test tab "BLE echte data test", including MQTT input, normalization, Debug nodes, TCP server and routing Functions, is documented in docs/NODERED_LIVE_TEST_FLOW.md.
+- MQTT topic: N/b827eb14d4ec/system/0/Batteries; SmartShunt instances 293 and 294 plus starter battery; temporary USB JK BMS instance 2 excluded.
+- MQTT message intervals were observed to be irregular at the MQTT Input itself. Solar/charging-related value changes are a plausible explanation, not a proven publication rule. The bridge is not established as the cause.
+- This is a successful development test, not a production release or SetupHelper clean-install/reboot acceptance. The Node-RED flow remains independently managed on the live Node-RED system.
+- No Pi runtime, Node-RED flow, firmware, build or flash was changed by this documentation commit.
+
+
 ## v0.1.4 — v0.3.9 battery telemetry transport and Node-RED nodes (development)
 - Add a Node-RED Function that maps SmartShunt instances 293 and 294 plus starter battery voltage to the compact JSON contract expected by ESP32 firmware v0.3.9.
 - Add an importable Node-RED tab containing the normalization Function, a Debug node, and wiring instructions. It reuses the existing MQTT input, active TCP-client routing Function, and TCP server; no broker credentials or duplicate server are included.
