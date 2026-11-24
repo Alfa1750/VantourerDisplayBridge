@@ -1,9 +1,9 @@
 > [!CAUTION]
-> **EXPERIMENTAL DEVELOPMENT — NOT WORKING / NOT READY FOR INSTALLATION**
+> **EXPERIMENTAL DEVELOPMENT — NOT A PRODUCTION RELEASE**
 >
-> This repository contains work in progress. The SetupHelper package and BLE bridge have **not** been validated as a working, end-to-end installation. Installation, updates, reboot behavior, and live BLE operation on a clean Venus OS system are still under development and testing.
+> This repository contains work in progress. A live battery telemetry path has been confirmed on the existing development setup with ESP32 firmware v0.3.9 and Pi bridge v0.1.4. However, clean-system installation, SetupHelper install/update/uninstall acceptance, reboot behavior, and recovery testing are still incomplete.
 >
-> **Do not install this package on a production system or rely on it for operation.** It is published publicly only so Venus OS SetupHelper can retrieve development updates during testing. The code and package may change or break without notice.
+> **Do not treat this package as a production release or install it on a production system.** It is published publicly so Venus OS SetupHelper can retrieve development updates during testing. The code and package may change or break without notice.
 
 # VantourerDisplayBridge
 
