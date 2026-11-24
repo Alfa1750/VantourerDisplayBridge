@@ -5,6 +5,7 @@ import dbus.mainloop.glib
 from gi.repository import GLib
 import os
 import signal
+from collections import deque
 from tcp_client import NodeRedTcpClient
 
 BLUEZ='org.bluez'
@@ -20,6 +21,16 @@ TX_UUID='8f7a0002-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
 RX_UUID='8f7a0003-6d5b-4c3a-9e2f-1a0b2c3d4e5f'
 mainloop=None
 
+# Application-level BLE framing: 20-byte values work with the minimum ATT MTU
+# of 23 bytes (20-byte notification payload), independent of MTU negotiation.
+BLE_FRAME_MAGIC = b"VD"
+BLE_FRAME_VERSION = 1
+BLE_NOTIFICATION_VALUE_MAX = 20
+BLE_FRAME_HEADER_SIZE = 6
+BLE_FRAME_DATA_SIZE = BLE_NOTIFICATION_VALUE_MAX - BLE_FRAME_HEADER_SIZE
+BLE_MAX_MESSAGE_SIZE = BLE_FRAME_DATA_SIZE * 255
+BLE_FRAGMENT_INTERVAL_MS = 10
+
 class Characteristic(dbus.service.Object):
     def __init__(self,bus,index,uuid,flags,service):
         self.path=service.path+'/char'+str(index)
@@ -27,6 +38,9 @@ class Characteristic(dbus.service.Object):
         self.value=[]
         self.notifying=False
         self.on_write=None
+        self._tx_fragments=deque()
+        self._tx_timer_id=0
+        self._tx_message_id=0
         dbus.service.Object.__init__(self,bus,self.path)
 
     def get_path(self):
@@ -61,6 +75,7 @@ class Characteristic(dbus.service.Object):
     @dbus.service.method(CHAR_IFACE)
     def StopNotify(self):
         self.notifying=False
+        self._tx_fragments.clear()
         print('ESP32 heeft notifications uitgeschakeld',flush=True)
 
     @dbus.service.signal(PROP,signature='sa{sv}as')
@@ -69,12 +84,42 @@ class Characteristic(dbus.service.Object):
 
     def send(self,data):
         data=bytes(data)
-        self.value=[dbus.Byte(b) for b in data]
         if not self.notifying:
             print('Pi -> ESP32: notification niet actief; bericht overgeslagen',flush=True)
             return
+        if not data or len(data)>BLE_MAX_MESSAGE_SIZE:
+            print('Pi -> ESP32: berichtlengte ongeldig ({} bytes; maximum {}); verworpen'.format(
+                len(data),BLE_MAX_MESSAGE_SIZE),flush=True)
+            return
+
+        self._tx_message_id=(self._tx_message_id+1)&0xff
+        fragment_count=(len(data)+BLE_FRAME_DATA_SIZE-1)//BLE_FRAME_DATA_SIZE
+        for index in range(fragment_count):
+            start=index*BLE_FRAME_DATA_SIZE
+            payload=data[start:start+BLE_FRAME_DATA_SIZE]
+            frame=(BLE_FRAME_MAGIC+bytes((BLE_FRAME_VERSION,self._tx_message_id,
+                                          index,fragment_count))+payload)
+            self._tx_fragments.append(frame)
+
+        print('Pi -> ESP32: {} bytes in {} BLE-fragmenten (bericht {})'.format(
+            len(data),fragment_count,self._tx_message_id),flush=True)
+        if not self._tx_timer_id:
+            self._tx_timer_id=GLib.timeout_add(
+                BLE_FRAGMENT_INTERVAL_MS,self._send_next_fragment)
+
+    def _send_next_fragment(self):
+        if not self.notifying:
+            self._tx_fragments.clear()
+            self._tx_timer_id=0
+            return False
+        if not self._tx_fragments:
+            self._tx_timer_id=0
+            return False
+
+        frame=self._tx_fragments.popleft()
+        self.value=[dbus.Byte(b) for b in frame]
         self.PropertiesChanged(CHAR_IFACE,{'Value':self.value},[])
-        print('Pi -> ESP32: {} bytes {}'.format(len(data),repr(data)),flush=True)
+        return True
 
 class Service(dbus.service.Object):
     def __init__(self,bus,index):
