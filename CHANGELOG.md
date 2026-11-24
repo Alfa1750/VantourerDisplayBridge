@@ -17,7 +17,7 @@
 - Queue fragments at 10 ms intervals; reject empty or oversized logical messages instead of truncating them.
 - Add source-level tests for the framing helper and Node-RED normalization Function. Synthetic JavaScript fixtures were exercised in the ChatGPT JavaScript runtime. GitHub Actions run `45443182121` passed Python syntax, TCP client tests, Node-RED Function tests, flow JSON validation, and package-layout checks. The live Node-RED runtime and Pi BLE link have not been tested.
 - Raspberry Pi package version marker: v0.1.4. This is independent of ESP32 firmware v0.3.9.
-- Build/install/deployment on the Raspberry Pi: not performed. Hardware BLE validation: pending.
+- The user installed v0.1.4 on the reference Pi and confirmed live battery telemetry on ESP32 firmware v0.3.9. Clean-install and SetupHelper lifecycle acceptance remain pending.
 
 
 ## Development note — Venus OS MQTT battery input investigation (2026-11-24; not a package version)
