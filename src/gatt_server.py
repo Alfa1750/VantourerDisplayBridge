@@ -63,6 +63,8 @@ class Characteristic(dbus.service.Object):
 
     @dbus.service.method(CHAR_IFACE)
     def StartNotify(self):
+        # Never resume fragments left over from a previous BLE connection.
+        self._tx_fragments.clear()
         self.notifying=True
         print('ESP32 heeft notifications ingeschakeld',flush=True)
 
