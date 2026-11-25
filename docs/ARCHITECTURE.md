@@ -100,3 +100,10 @@ The display bridge and JK-BMS monitor must each reconnect independently if Node-
 ## BLE recovery and reconnection requirement
 
 The ESP32 display must recover automatically when the Raspberry Pi BLE GATT server or its advertising becomes temporarily unavailable and later returns. After a lost connection or failed discovery, the ESP32 must resume scanning/retry discovery with an appropriate retry strategy and reconnect when `VantourerBridge` becomes available again. Recovery must not require a manual ESP32 reboot or power cycle. The implementation must handle both an established connection being lost and the Pi becoming unavailable before a connection is established. This is a design requirement; automatic recovery behavior is not yet implemented or verified.
+
+
+## JK-BMS acquisition — alternative under evaluation (2026-11-25)
+
+Before implementing the separate custom JK-BMS monitor, test the existing installed dbus-serialbattery package's `Jkbms_Ble` capability with both JK BMS devices simultaneously. Multi-BMS BLE support appears to be available upstream, but simultaneous compatibility and stable behavior with the user's specific devices and Venus OS 3.85 / Raspberry Pi 4B are not yet verified. This is a test-first alternative, not an architecture decision or confirmed success.
+
+A manual Bluetooth-release control is required for the monitor regardless of implementation choice: temporarily suppress the Pi's connection and automatic reconnect attempts to release the JK BMS devices for phone access (e.g. changing settings), then resume and reconnect to both. Avoid disabling the entire Bluetooth adapter or disrupting unrelated BLE devices. The exact control mechanism, status feedback, and recovery behavior must be researched and tested.
