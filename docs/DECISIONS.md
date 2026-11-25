@@ -49,3 +49,20 @@ ESP32 project v0.3.6 is not the Python bridge version. Python bridge's observed 
 ## D-012 — Test helpers are not production behavior
 **Status:** Required  
 Fake telemetry, fixed greeting messages, TCP echo, and manual test clients must be classified as test-only and not shipped as active production behavior.
+
+
+## D-013 — Separate JK-BMS monitor-only D-Bus service (new project)
+**Status:** Chosen design; implementation not started
+
+Create a new, separate GitHub repository for a JK-BMS battery-monitor-only package for Venus OS. The implementation will be derived by studying and selectively reusing the relevant communication, protocol, parsing, and data-acquisition methods/scripts/programming from the upstream `dbus-serialbattery` GitHub repository (including its JK-BMS serial support). The upstream project is a source/reference for necessary methods, not a package to install unchanged.
+
+**Strict scope:** provide battery-monitor telemetry only, through a minimal D-Bus battery-monitor service. The new package must not act as a BMS charging/discharging controller and must not publish or implement charge/discharge control limits or control requests that could cause Venus OS systemcalc or chargers to enter BMS-controlled operation.
+
+- Retain only necessary JK-BMS communication, protocol handling, parsing, and telemetry/data processing.
+- Publish monitoring data only (for example voltage, current, SOC, cell voltages, temperatures and other supported read-only measurements).
+- Exclude CVL/CCL/DCL control functionality, charge/discharge regulation and control-oriented D-Bus properties/flags. Exact D-Bus surface must be reviewed before implementation.
+- The objective is to avoid this monitor service influencing charger/MPPT control or setting BMS-controlled mode; this must be demonstrated by tests, not assumed.
+- Create and populate the new repository through the direct GitHub connection. The repository name is to be selected before creation.
+- Do not install or change anything on the camper/reference Pi during development without explicit approval. Builds, installs, service changes and live tests require the user's explicit approval.
+
+**Planned work:** inspect the upstream source and license; map the JK-BMS communication/data paths; design the monitor-only D-Bus interface; implement a minimal independent package; review statically for control-related properties; test data reporting and connection-loss behavior on a separate test system; verify that charger/MPPT BMS-control flags do not become enabled due to the monitor service; then document results and installation procedure.
