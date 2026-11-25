@@ -370,3 +370,28 @@ This dated update records later test progress and must be read alongside the ear
 - The `vesmart-server` was manually stopped for the BLE test only. It was not persistently disabled; do not assume the workaround survives a reboot.
 - Venus OS logs use UTC. The user's local time is Netherlands time.
 - On the BusyBox Venus OS environment, use `svstat /service/<name>`, `svc -d /service/<name>`, and `svc -u /service/<name>` where appropriate. The `sv` command is not available on the observed system.
+
+
+## New design decision — JK-BMS monitor-only package (Nov 25, 2026)
+
+**Chosen direction; not implemented yet.** We will create a new GitHub repository, separate from the existing VantourerDisplayBridge repository, for a Venus OS JK-BMS battery-monitor-only service.
+
+The code and methods required for communication with JK-BMS and for protocol handling, parsing, and reading telemetry will be studied and selectively reused/adapted from the upstream GitHub `dbus-serialbattery` repository. We will not simply install or fork the full package unchanged: the new project is to be deliberately reduced to the necessary monitor functionality.
+
+### Scope and exclusions
+- Read and expose supported monitoring data (e.g. battery voltage/current, SOC, cell voltages and temperatures).
+- Use a minimal D-Bus battery-monitor service.
+- No charge/discharge control, regulation, CVL/CCL/DCL implementation, or control-oriented limit/flag publishing that could cause Venus OS/systemcalc or MPPTs to enter BMS-controlled mode.
+- The goal is that the JK-BMS monitor is observational only and cannot influence charger operation. This is an explicit design requirement to be verified experimentally and by source review, not a guarantee before testing.
+
+### Planned development sequence
+1. Select the name and create the new repository directly via the GitHub connection.
+2. Inspect upstream `dbus-serialbattery` source and identify the JK-BMS communication and telemetry portions needed; review license and attribution requirements.
+3. Define a minimal read-only D-Bus service/interface for monitor data.
+4. Implement the separate monitor package by selectively adapting necessary upstream methods/scripts.
+5. Review the code and D-Bus output for control-related properties/flags and remove any not strictly needed for monitoring.
+6. Test on a separate test system: telemetry correctness, disconnect/reconnect, service startup/shutdown and failure behavior.
+7. Verify specifically that the service does not cause MPPT BMS-controlled mode or otherwise control charging/discharging.
+8. Only after review and testing, prepare installation steps. No camper/reference Pi changes, installs, service restarts, builds or live tests without explicit user approval.
+
+This work is separate from VantourerDisplayBridge's BLE display bridge and does not change its current architecture or implementation.
