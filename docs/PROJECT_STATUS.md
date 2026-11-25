@@ -480,3 +480,19 @@ This section supersedes earlier statements in this file that live BLE fragmentat
 - Do not attribute the irregular intervals to Pi bridge v0.1.4 without further evidence.
 - This milestone does not validate every possible MQTT payload shape, reconnect/restart recovery, SetupHelper clean installation, uninstall, reboot behavior, or the final production Node-RED flow.
 - The user controls all live-system changes. No Node-RED flow, Pi configuration, service, firmware, build or flash was changed as part of this documentation update.
+
+
+## Design investigation — reuse installed dbus-serialbattery for two JK BMS BLE connections (2026-11-25)
+
+The user notes that dbus-serialbattery is already installed on the camper Pi and has previously been used with a JK BMS over wired connection. The upstream package appears to support `Jkbms_Ble` and configuration of multiple BLE BMS devices. Rather than immediately building a custom BLE JK-BMS acquisition implementation, the next practical step is a user-controlled test of the existing installation with both JK BMS devices over Bluetooth.
+
+- Test whether both BMS devices connect simultaneously and remain independently visible/data-readable.
+- Confirm stability and device identity on the actual Venus OS 3.85 / Raspberry Pi 4B setup; this is not yet verified.
+- Review the consequences of dbus-serialbattery exposing devices via Venus OS/D-Bus against the current monitor design boundary (which originally avoids registering JK BMS devices as managed BMS devices). Do not silently change that design boundary.
+- No installation, runtime configuration, service, Node-RED flow or live Pi change was performed as part of recording this proposal.
+
+### Required manual Bluetooth release/resume control
+
+The design requires a user-operated control to release the Pi's JK BMS BLE connections temporarily, allowing a phone to connect to a BMS and change settings. The release state must stop both active acquisition and automatic reconnection attempts for the BMS devices, without disabling the entire Bluetooth adapter or disrupting unrelated BLE devices. A second control action must resume acquisition and reconnect to both devices, with per-device status feedback. A simple disconnect that is immediately followed by automatic reconnection is not sufficient. The implementation mechanism remains to be researched and tested.
+
+This is a proposed test direction and design requirement only; it is not validated implementation or a confirmed replacement for the custom monitor.
