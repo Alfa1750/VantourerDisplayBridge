@@ -395,3 +395,36 @@ The code and methods required for communication with JK-BMS and for protocol han
 8. Only after review and testing, prepare installation steps. No camper/reference Pi changes, installs, service restarts, builds or live tests without explicit user approval.
 
 This work is separate from VantourerDisplayBridge's BLE display bridge and does not change its current architecture or implementation.
+
+
+## Venus OS GUI v1 white-screen fix — verified on test Pi (Nov 25, 2026)
+
+**Verified fix on the test Raspberry Pi (raspberrypi2), Venus OS 3.85. The camper Pi has not yet been changed.**
+
+After uninstalling dbus-serialbattery and rebooting the test Pi, GUI v1 displayed a white/blank screen while GUI v2 remained usable. Investigation found six battery-related QML files containing the incompatible QtQuick import `import QtQuick 1.1`. The tested correction was to replace that import with `import QtQuick 2` in all six files and restart the GUI service.
+
+Files changed:
+- `/opt/victronenergy/gui/qml/PageBattery.qml`
+- `/opt/victronenergy/gui/qml/PageBatteryCellVoltages.qml`
+- `/opt/victronenergy/gui/qml/PageBatteryParameters.qml`
+- `/opt/victronenergy/gui/qml/PageBatterySettings.qml`
+- `/opt/victronenergy/gui/qml/PageBatterySetup.qml`
+- `/opt/victronenergy/gui/qml/PageLynxIonIo.qml`
+
+The user ran the following on the test Pi:
+
+```sh
+mount -o remount,rw / 2>/dev/null || true
+QML=/opt/victronenergy/gui/qml
+for f in PageBattery.qml PageBatteryCellVoltages.qml PageBatteryParameters.qml PageBatterySettings.qml PageBatterySetup.qml PageLynxIonIo.qml; do
+    if [ -f "$QML/$f" ] && grep -q '^import QtQuick 1\\.1$' "$QML/$f"; then
+        cp -a "$QML/$f" "$QML/$f.before-qtquick-fix"
+        sed -i 's/^import QtQuick 1\\.1$/import QtQuick 2/' "$QML/$f"
+    fi
+done
+svc -t /service/gui
+```
+
+**Observed result:** all six files were reported as changed; the GUI service was restarted without an error shown, and the user confirmed that GUI v1 returned and the screen was working again. This directly verifies the correction on that test Pi. It does not independently prove the root cause beyond the successful correction, nor establish that all Venus OS versions require it.
+
+Each changed file has a same-directory rollback copy named `.before-qtquick-fix`. To apply the same correction to the camper Pi later, first inspect its Venus OS version and the imports in the six files; only apply the replacement where `QtQuick 1.1` is present. Make backups before changing files and restart the GUI service after the replacements. Do not assume the test Pi's files or backups are identical to the camper Pi.
