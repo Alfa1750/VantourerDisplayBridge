@@ -23,3 +23,10 @@ All notable project changes will be recorded here.
 - Verified system configuration and dependency inventory.
 
 This initial repository baseline is documentation only; it is not an installable release.
+
+
+### Fixed — GUI v1 white screen on test Pi (Nov 25, 2026)
+- On the test Raspberry Pi running Venus OS 3.85, replaced `import QtQuick 1.1` with `import QtQuick 2` in six battery-related QML files: PageBattery, PageBatteryCellVoltages, PageBatteryParameters, PageBatterySettings, PageBatterySetup, and PageLynxIonIo.
+- Created per-file rollback copies using the suffix `.before-qtquick-fix`.
+- Restarted `/service/gui`; user confirmed GUI v1 returned and displayed normally.
+- Documented as a verified test-Pi fix to repeat only after checking the camper Pi's version and files. Camper Pi remains unmodified.
