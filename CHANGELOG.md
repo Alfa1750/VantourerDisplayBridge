@@ -1,3 +1,11 @@
+## Design investigation — existing dbus-serialbattery BLE for two JK BMS devices + manual release (2026-11-25)
+- The package is already installed on the camper Pi and has previously been used for a wired JK BMS connection. Upstream appears to support JK BMS BLE (`Jkbms_Ble`) and multiple devices, but simultaneous connection and stable behavior with both specific BMS devices on Venus OS 3.85 / Raspberry Pi 4B still require a live test.
+- Test the existing installation first rather than immediately implementing a custom BLE acquisition stack.
+- Design requirement: manual Bluetooth release must suppress active connection and automatic reconnect attempts so a phone can connect and modify BMS settings. Resume must restore acquisition and reconnect to both, with status feedback. Avoid disabling the whole Bluetooth adapter or interfering with unrelated BLE devices.
+- Review whether dbus-serialbattery's D-Bus/Venus OS exposure is consistent with the monitor's existing design boundary before adopting it.
+- No live Pi, package, Node-RED flow, service, configuration or BMS setting was changed. This records a proposal, not test results or an architecture decision.
+
+
 # Changelog
 
 ## Live validation note — ESP32 v0.3.9 + Pi v0.1.4 + Node-RED battery test (2026-11-24)
