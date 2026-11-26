@@ -30,3 +30,8 @@ This initial repository baseline is documentation only; it is not an installable
 - Created per-file rollback copies using the suffix `.before-qtquick-fix`.
 - Restarted `/service/gui`; user confirmed GUI v1 returned and displayed normally.
 - Documented as a verified test-Pi fix to repeat only after checking the camper Pi's version and files. Camper Pi remains unmodified.
+
+
+### Documented — clean test-Pi baseline procedure (Nov 26, 2026)
+- Added the verified sequence for uninstalling dbus-serialbattery, rebooting, checking removal, and correcting the GUI v1 QtQuick imports if needed.
+- The procedure retains overlay-fs and includes only the commands used and confirmed in this cleanup.

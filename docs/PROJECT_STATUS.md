@@ -428,3 +428,48 @@ svc -t /service/gui
 **Observed result:** all six files were reported as changed; the GUI service was restarted without an error shown, and the user confirmed that GUI v1 returned and the screen was working again. This directly verifies the correction on that test Pi. It does not independently prove the root cause beyond the successful correction, nor establish that all Venus OS versions require it.
 
 Each changed file has a same-directory rollback copy named `.before-qtquick-fix`. To apply the same correction to the camper Pi later, first inspect its Venus OS version and the imports in the six files; only apply the replacement where `QtQuick 1.1` is present. Make backups before changing files and restart the GUI service after the replacements. Do not assume the test Pi's files or backups are identical to the camper Pi.
+
+
+## Clean test-Pi reset procedure after dbus-serialbattery removal (Nov 26, 2026)
+
+This is the documented, repeatable procedure used to establish a clean baseline before testing JK-BMS-Monitor. It contains only the commands used in this procedure; the unsupported `sv` command and other improvised checks are excluded.
+
+### 1. Uninstall dbus-serialbattery
+
+Run:
+
+```sh
+bash /data/apps/dbus-serialbattery/uninstall.sh
+```
+
+At the prompt to delete installation/configuration/logs, answer `y`. At the prompt to disable `overlay-fs`, answer `n` so the shared overlay-fs is retained.
+
+### 2. Reboot
+
+```sh
+reboot
+```
+
+### 3. Verify removal after reconnecting
+
+```sh
+ls -la /data/apps/
+dbus -y
+ls -d /service/dbus-serialbattery.* /service/dbus-blebattery.* /service/dbus-canbattery.* 2>/dev/null
+ls -l /data/conf/serial-starter.d/dbus-serialbattery.conf
+```
+
+Expected: `/data/apps/` contains only the retained `overlay-fs` app; `dbus -y` does not show the removed battery driver; no matching service directories are listed; the serial-starter config file is absent (the final `ls` reports that it cannot find the file).
+
+### 4. Correct the GUI v1 QtQuick imports
+
+After uninstalling dbus-serialbattery, GUI v1 may show a blank screen. On the verified test Pi, the correction was to change `import QtQuick 1.1` to `import QtQuick 2` in the six listed files under `/opt/victronenergy/gui/qml`, creating rollback copies, then restarting the GUI service:
+
+```sh
+mount -o remount,rw / 2>/dev/null || true
+QML=/opt/victronenergy/gui/qml
+for f in PageBattery.qml PageBatteryCellVoltages.qml PageBatteryParameters.qml PageBatterySettings.qml PageBatterySetup.qml PageLynxIonIo.qml; do if [ -f "$QML/$f" ] && grep -q '^import QtQuick 1\\.1$' "$QML/$f"; then cp -a "$QML/$f" "$QML/$f.before-qtquick-fix"; sed -i 's/^import QtQuick 1\\.1$/import QtQuick 2/' "$QML/$f"; echo "Aangepast: $f"; else echo "Geen wijziging nodig: $f"; fi; done
+svc -t /service/gui
+```
+
+The user confirmed on the test Pi that this command restored GUI v1. This is a verified correction on that Pi, not a universal claim about every Venus OS release. Keep `overlay-fs`; do not uninstall it as part of this cleanup.

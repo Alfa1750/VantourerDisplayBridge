@@ -48,3 +48,13 @@ When a test is repeated, record:
 - Relevant unedited log output.
 - Expected and actual result.
 - Whether it is a development-only test or production acceptance test.
+
+
+## T-008 — Clean baseline after dbus-serialbattery removal and GUI correction (Nov 26, 2026)
+
+- Restored a backup of the test Pi with neither VantourerDisplayBridge nor JK-BMS-Monitor installed.
+- Ran the dbus-serialbattery uninstall script; selected removal of installation/configuration/logs and retained overlay-fs.
+- Rebooted the Pi.
+- Confirmed `/data/apps/` contained only `overlay-fs`; `dbus -y` showed no dbus-serialbattery service; matching service directories and serial-starter configuration were absent.
+- Applied the documented QtQuick import correction in the six GUI v1 QML files under `/opt/victronenergy/gui/qml` and restarted `/service/gui`. User confirmed GUI v1 returned and worked.
+- Result: clean baseline for JK-BMS-Monitor 0.2.0 testing, with overlay-fs retained.
